@@ -1,8 +1,7 @@
-#define PIN_LED D4
-#define PIN_SPEAK D5
-#define PIN_SENSE D6
-
+#include "hardware.h"
+#include "monitor.h"
 #include "server.h"
+#include <LittleFS.h>
 Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);
 ESP8266WebServer server(80);
 
@@ -10,7 +9,6 @@ ESP8266WebServer server(80);
 const char* ssid = SSID_NAME_SECRET;
 const char* password = SSID_PWD_SECRET;
 
-#include <LittleFS.h>
 
 void setup() {
   Serial.begin(19200);
@@ -76,9 +74,6 @@ void setup() {
   server.on("/scan", HTTP_GET, isPresentHandle);
   server.on("/network", HTTP_GET, onNetworkScanRequestHandle); 
   server.on("/", HTTP_GET, onRootHandle);
-  // server.on("/index.html", HTTP_GET, onRootHandle);
-  // server.on("/index.htm", HTTP_GET, onRootHandle);
-  // server.on("/index.html", HTTP_GET, onRootHandle);
   server.onNotFound(notFoundHandle);
   server.begin();
 
@@ -113,26 +108,17 @@ bool fileRequestHandle(String path) {
   return false;
 }
 
-
-bool meow = false;
-bool meowOld = false;
-
-void isPresentHandle(){
-  server.send(200, "text/json", meow ? "{\"isPresent\":true}" : "{\"isPresent\":false}");
-}
-
 void loop() {
-  meowOld = meow;
-  meow = digitalRead(PIN_SENSE);
+  updateMonitor();
 
-  if(meow && !meowOld){
+  if(didEnterPresence()){
     display.clearDisplay();
     display.setCursor(0,0);
     display.setTextSize(4);
     display.println("Meow");
     display.display();
   }
-  else if(!meow && meowOld){
+  else if(didLeavePresence()){
     display.clearDisplay();
     display.setCursor(0,0);
     display.setTextSize(2);

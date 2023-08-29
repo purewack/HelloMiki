@@ -28,7 +28,6 @@ void onNetworkScanRequestHandle(){
                     JSON_NEXT(resp_json);
             }
         );
-         Serial.println(resp_json);
         server.send(200, "text/json", resp_json);
     } else {
         server.send(200, "text/json", "[]");

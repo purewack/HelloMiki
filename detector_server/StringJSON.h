@@ -7,6 +7,7 @@
 #define JBOOL(X) (X ? "true" : "false")
 #define JNUM(X) X
 #define JSTR(X) QQ X QQ
+#define JNULL "null"
 
 #define JSON_ARRAY(ADDTO, CONTENT) \
     ADDTO += "[";\
