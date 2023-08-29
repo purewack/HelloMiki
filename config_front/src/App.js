@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getNetworkList, getStatus } from './REST';
+import { getNetworkList, getStatus } from './REST.mock';
 
 import './App.css';
 // import iconCat from './Res/cat-svgrepo-com.svg'
@@ -85,14 +85,18 @@ function App() {
               <ul className='Networks'>
                 {networks.map((network,i) => {
                   if(network.loading) 
-                    return <li className='Selection Card Loading' key={`ssid_load_${i}`}>...</li>
+                    return <li className='Selection Card Loading' key={
+                      `net_load_${i}`
+                    }>...</li>
                   else{
                     let strength
                     if(network.strength >= -40) strength = "Max"
                     else if(network.strength >= -50) strength = "High"
                     else if(network.strength >= -60) strength = "Med" 
                     else strength = "Low"
-                    return <li className={'Selection Card '} key={`ssid_${network.ssid}`}>
+                    return <li className={'Selection Card '} key={
+                      `net_${network.ssid}_${network.channel}_${network.strength}`
+                    }>
                       <span>{network.ssid}</span>
                       <img src={iconSignal} className={'StrengthIcon ' + (strength)}/>
                     </li>
