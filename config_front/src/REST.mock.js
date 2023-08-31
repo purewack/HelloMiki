@@ -26,7 +26,6 @@ export function getLocalPresence(){
     return new Promise((resolve, rej)=>{
         setTimeout(()=>{
             resolve({
-                time: new Date().toUTCString(), 
                 zone: 'house',
                 direction: 'entered',
             });

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { getNetworkList, getStatus } from './REST.mock';
+import { getNetworkList, getLocalPresence } from './REST.mock';
 
 import './App.css';
 // import iconCat from './Res/cat-svgrepo-com.svg'
-import iconSignal from './Res/signal-strong-svgrepo-com.svg'
-import iconWifi from './Res/wifi-svgrepo-com.svg'
-import iconAbout from './Res/question-svgrepo-com.svg'
-import iconMonitor from './Res/ear-3-svgrepo-com.svg'
+// import iconSignal from './Res/signal-strong-svgrepo-com.svg'
+// import iconWifi from './Res/wifi-svgrepo-com.svg'
+// import iconAbout from './Res/question-svgrepo-com.svg'
+// import iconMonitor from './Res/ear-3-svgrepo-com.svg'
 
 function Option({onSelect, onActivated, type, title, icon, children}){
   const [active, setActive] = useState(false);
@@ -31,27 +31,46 @@ function Option({onSelect, onActivated, type, title, icon, children}){
 }
 
 
+const catVoiceAlert = ()=>{
+  let msg = new SpeechSynthesisUtterance();
+  msg.text = "Meow Meow Meow, Meow please let me in";
+  window.speechSynthesis.speak(msg);
+}
+
 function App() {
 
   const appRef = useRef();
 
   const [status, setStatus] = useState('...');
-  const [mode, setMode] = useState('');
+  const [mode, setMode] = useState('Configure');
   const [networks, setNetworks] = useState();
+
+  const [monitorEvents, setMonitorEvents] = useState([])
+  const [monitorFreq, setMonitorFreq] = useState(1000);
+  const monitorTimer = useRef();
+
+
+  // useEffect(()=>{
+  //   monitorTimer.current = setInterval(()=>{
+  //     getLocalPresence().then(r=>{
+  //       if(r.direction) {
+  //         catVoiceAlert();
+  //         setMonitorEvents(v => {
+  //           return [...v, {...r, time: new Date().toUTCString()}];
+  //         })
+  //       }
+  //     })
+  //   },monitorFreq)
+
+  //   return ()=>{
+  //     clearInterval(monitorTimer.current);
+  //   }
+  // })
+
 
   const select = (ev)=>{
     setMode(ev.target.id);
   }
-
-  // useEffect(()=>{
-  //   getStatus().then(r=> {
-  //     setStatus(r.connected ? "" : "Not " + "Connected")
-  //   })
-  // }, [])
-  
-  useEffect(()=>{
-    console.log(mode)
-  },[mode]);
 
   const networkFetch = ()=>{
     setNetworks([
@@ -70,15 +89,35 @@ function App() {
       <header className="Title">
         <div>
         <h1>Hello-Miki</h1>
-        <h2>Configuration</h2>
+        <h2>{mode}</h2>
         </div>
         <span className='Logo'>😻</span>
         {/* <img src={icon}/> */}
       </header>
+      
+      <form action='/network/select' method='POST'>
+        <input type='text' name='SSID'/>
+        <input type='text' name='PSK' />
+        <input type='submit' name='SUBMIT' value='Connect' />
+      </form>
+      
+      {/* 
+      <section className='Monitor'>
+        <h1>Cat Events:</h1>
+        <button onClick={catVoiceAlert}>Test Alert</button>
+        <ul className='Events'>
+          {monitorEvents.map((e,i) => {
+            return <li className={'Event'} key={`event_${e.time}`}>{JSON.stringify(e)}</li>
+          })}
+        </ul>
+      </section> */}
 
-      <section className='Content'>
-        <ul className={'ContentContainer ' + (mode ? ' Selected' : '')}>
-          <Option type="network" icon={iconWifi} onSelect={networkFetch} 
+      {/* <section className='Content'>
+        <ul className={'ContentContainer '}>
+          <Option type="network" icon={iconWifi} onSelect={(ev)=>{
+            networkFetch()
+            select(ev)
+          }} 
             title="Pick your WiFi">
           {
             networks && <>
@@ -109,11 +148,9 @@ function App() {
           </Option>
           <Option type="monitor" icon={iconMonitor} title={'Open Monitor'} onSelect={select}/>
           <Option type="about" icon={iconAbout} title={'About'} onSelect={select}/>
-          {/* <Option type="fullscreen" title={'Fullsceen'} onSelect={()=>{
-            appRef.current.requestFullscreen()
-          }}/> */}
+         
         </ul>
-      </section>
+      </section> */}
 
       {/* <nav className='Nav'>
         <h2>Status: {status}</h2>

@@ -1,14 +1,9 @@
 #include "hardware.h"
 #include "monitor.h"
 #include "server.h"
-#include <LittleFS.h>
 Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);
 ESP8266WebServer server(80);
-
-#include "secret.h"
-const char* ssid = SSID_NAME_SECRET;
-const char* password = SSID_PWD_SECRET;
-
+char saved_ssid[32];
 
 void setup() {
   Serial.begin(19200);
@@ -23,62 +18,98 @@ void setup() {
   pinMode(PIN_SENSE, INPUT);
   pinMode(PIN_SPEAK, OUTPUT);
 
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.disconnect();
+  WiFi.softAP("hellomiki_config","letmein");
+
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.setTextSize(1);
+
   LittleFS.begin();
   
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.begin(ssid, password);
-  WiFi.softAP("hellomiki","letmein");
- 
-  display.clearDisplay();
-  display.setCursor(0,0);
-  display.setTextSize(1);
-  display.println("Connecting");
-  int tries = 0;
-  while (WiFi.status() != WL_CONNECTED) {
-    tries++;
-    if(tries > 30){
-      display.clearDisplay();
-      display.setCursor(0,0);
-      display.println("WiFi connection failed :(");
-      display.println("Configure network");
-      display.display();
-      delay(5000);
-      break;
-    }
-    delay(500);
+  display.println("WiFi Connecting");
+  auto wifiWaitDisplay = [](){
     display.print(".");
     display.display();
-  }
-  display.clearDisplay();
-  display.setCursor(0,0);
-  display.setTextSize(1);
-    
-    display.println("Hello Miki!");
-    display.println("");
+  };
+  auto wifiOkDisplay = [](){
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.setTextSize(1);
+      
+      display.println("Hello Miki!");
+      display.println("");
 
-    display.println("LAN IP:");
-    display.print(" > ");
-    display.println(WiFi.localIP());
-    display.println("");
+      display.println("Connected :)");
+      display.println("");
 
-    display.println("Direct Access IP:");
-    display.print(" > ");
-    display.println(WiFi.softAPIP());
+      display.println(saved_ssid);
+      display.println("IP:");
+      display.print(" > ");
+      display.println(WiFi.localIP());
+    display.display();
+  };
+  auto wifiFailDisplay = [](){
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.setTextSize(1);
+      
+      display.println("Hello Miki!");
+      display.println("");
 
-  display.display();
+      display.println("Wifi Failed :O");
+      display.println("");
+
+      display.println("Config IP:");
+      display.print(" > ");
+      display.println(WiFi.softAPIP());
+    display.display();
+    WiFi.disconnect();
+  };
+  connectToWifi(wifiWaitDisplay, wifiOkDisplay, wifiFailDisplay, [](){
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.setTextSize(1);
+      
+      display.println("Hello Miki!");
+      display.println("");
+
+      display.println("WiFi unconfigured");
+      display.println("");
+
+
+      display.println("Direct Access IP:");
+      display.print(" > ");
+      display.println(WiFi.softAPIP());
+
+    display.display();
+  });
 
   MDNS.begin("hellomiki");
   MDNS.addService("http", "tcp", 80);
   
   server.enableCORS(true);
-  server.on("/scan", HTTP_GET, isPresentHandle);
-  server.on("/network", HTTP_GET, onNetworkScanRequestHandle); 
-  server.on("/", HTTP_GET, onRootHandle);
   server.onNotFound(notFoundHandle);
+  server.on("/", onRootHandle);
+
+  server.on("/scan", isPresentHandle);
+
+  // server.on("/private/*", forbiddenHandle);
+  server.on("/network", onNetworkScanRequestHandle); 
+  server.on("/network/select", [=](){
+    onNetworkChooseHandle();
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.println("Trying Wifi");
+    connectToWifi(wifiWaitDisplay, wifiOkDisplay, wifiFailDisplay, nullptr);
+  });
   server.begin();
 
 }
-
+void forbiddenHandle(){
+  server.send(403, "text/plain", "Forbidden access");
+}
 void notFoundHandle(){
   String uri = ESP8266WebServer::urlDecode(server.uri());  // required to read paths with blanks
   if(!fileRequestHandle(uri))
@@ -109,24 +140,23 @@ bool fileRequestHandle(String path) {
 }
 
 void loop() {
-  updateMonitor();
+  // updateMonitor();
 
-  if(didEnterPresence()){
-    display.clearDisplay();
-    display.setCursor(0,0);
-    display.setTextSize(4);
-    display.println("Meow");
-    display.display();
-  }
-  else if(didLeavePresence()){
-    display.clearDisplay();
-    display.setCursor(0,0);
-    display.setTextSize(2);
-    display.println("Scanning..");
-    display.display();
-  }
+  // if(didEnterPresence()){
+  //   display.clearDisplay();
+  //   display.setCursor(0,0);
+  //   display.setTextSize(4);
+  //   display.println("Meow");
+  //   display.display();
+  // }
+  // else if(didLeavePresence()){
+  //   display.clearDisplay();
+  //   display.setCursor(0,0);
+  //   display.setTextSize(2);
+  //   display.println("Scanning..");
+  //   display.display();
+  // }
   
-  delay(100);
   server.handleClient();
   MDNS.update();
 }

@@ -9,11 +9,12 @@ bool meowOld = false;
 void isPresentHandle(){
   String resp;
   JSON_OBJECT(resp,
-    if(meow){
+    if(meow && !meowOld){
       JSON_KV_STR(resp, "direction", "enter");
     }else{
       JSON_KV(resp, "direction", JNULL);
     }
+    meowOld = meow;
       
       JSON_NEXT(resp);
     JSON_KV_STR(resp, "zone", "home");
@@ -22,14 +23,13 @@ void isPresentHandle(){
 }
 
 void updateMonitor(){
-  meowOld = meow;
   meow = digitalRead(PIN_SENSE);
 }
 
 bool didEnterPresence(){
-    return meow && !meowOld;
+  return meow;
 }
 
 bool didLeavePresence(){
-    return !meow && meowOld;
+  return !meow;
 }

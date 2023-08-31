@@ -112,7 +112,7 @@ ul {
   grid-area: title;
 }
 
-.Option.active{
+.Option.active {
   background-color:antiquewhite;
 
   display: grid;
@@ -121,7 +121,7 @@ ul {
     "content content"
     "back extra";
 
-  grid-area: focus;
+  /* grid-area: focus; */
 }
 .Option.active li {
   background-color:rgb(224, 194, 174);
@@ -166,4 +166,24 @@ ul {
 @keyframes kf-loading-pulse {
   from{opacity:0.8}
   to{opacity:0.7}
+}
+
+
+.Events{
+  display: flex;
+  flex-direction: column-reverse;
+  list-style: none;
+}
+
+.Event{
+  background-color: antiquewhite;
+  margin: 1rem;
+  padding: 1rem;
+  border-radius: 0.25rem;
+}
+
+.Events .Event:last-child {
+  margin: 2rem;
+  font-weight: bold;
+  background-color:bisque;
 }
