@@ -131,42 +131,7 @@ ul {
 .Button.Refresh {
   grid-area: extra;
 }
-.Networks {
-  grid-area: content;
-  width: 100%;
-}
-.Networks ul {
-  display: inline-block;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-}
-.Networks li {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  padding-left: 2rem;
-}
-.Networks li img{
-  max-height: 2rem;
-}
-.Networks li img.High{
-  clip-path: inset(0 40% 0 0);
-}
-.Networks li img.Med{
-  clip-path: inset(0 60% 0 0);
-}
-.Networks li img.Low{
-  clip-path: inset(0 80% 0 0);
-}
-.Networks li.Loading {
-  text-align: center;
-  animation: kf-loading-pulse 0.3s alternate infinite;
-}
-@keyframes kf-loading-pulse {
-  from{opacity:0.8}
-  to{opacity:0.7}
-}
+
 
 
 .Events{

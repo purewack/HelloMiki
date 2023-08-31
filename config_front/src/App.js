@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getNetworkList, getLocalPresence } from './REST.mock';
 
 import './App.css';
+import NetworkPicker from './Components/NetworkPicker/index';
 // import iconCat from './Res/cat-svgrepo-com.svg'
 // import iconSignal from './Res/signal-strong-svgrepo-com.svg'
 // import iconWifi from './Res/wifi-svgrepo-com.svg'
@@ -43,7 +44,7 @@ function App() {
 
   const [status, setStatus] = useState('...');
   const [mode, setMode] = useState('Configure');
-  const [networks, setNetworks] = useState();
+  const [networks, setNetworks] = useState([]);
 
   const [monitorEvents, setMonitorEvents] = useState([])
   const [monitorFreq, setMonitorFreq] = useState(1000);
@@ -84,6 +85,10 @@ function App() {
     getNetworkList().then(l => setNetworks(l))
   }
 
+  useEffect(()=>{
+    networkFetch();
+  },[])
+
   return (
     <div className="App" ref={appRef}>
       <header className="Title">
@@ -95,22 +100,11 @@ function App() {
         {/* <img src={icon}/> */}
       </header>
       
-      <form action='/network/select' method='POST'>
-        <input type='text' name='SSID'/>
-        <input type='text' name='PSK' />
-        <input type='submit' name='SUBMIT' value='Connect' />
-      </form>
+      <NetworkPicker networks={networks} onRefresh={()=>{
+        networkFetch();
+      }} />
       
-      {/* 
-      <section className='Monitor'>
-        <h1>Cat Events:</h1>
-        <button onClick={catVoiceAlert}>Test Alert</button>
-        <ul className='Events'>
-          {monitorEvents.map((e,i) => {
-            return <li className={'Event'} key={`event_${e.time}`}>{JSON.stringify(e)}</li>
-          })}
-        </ul>
-      </section> */}
+      
 
       {/* <section className='Content'>
         <ul className={'ContentContainer '}>
