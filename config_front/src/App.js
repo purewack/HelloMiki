@@ -1,39 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import {useEffect, useRef, useState } from 'react';
 import { getNetworkList, getLocalPresence } from './REST.mock';
 
 import './App.css';
 import NetworkPicker from './Components/NetworkPicker/index';
 import './Res/svg.css'
-
-function Option({onSelect, onActivated, type, title, icon, children}){
-  const [active, setActive] = useState(false);
-  
-  return <li id={type} className={'Option Card ' + (active ? 'active' : '')} onClick={(ev)=>{
-    if(!active){
-      setActive(true)
-      onSelect?.(ev)
-      onActivated?.()
-    }
-  }}>
-    <h2>{title}</h2>
-    {active ? <>
-      {children}
-      <button className='Button' onClick={()=>{
-        setActive(false)
-        onSelect?.({target:{id:null}})
-      }}>Back</button>
-    </> : <img className={'Icon SVG ' + icon} />}
-    
-  </li>
-}
+import { CSSTransition } from 'react-transition-group';
+import { NavBar, NavOption, NavSet } from './Components/NavBar';
+import EventMonitor from './Components/EventMonitor/index';
 
 
 
 function App() {
 
-  const appRef = useRef();
-
-  const [status, setStatus] = useState('...');
   const [mode, setMode] = useState('Configure');
   const [networks, setNetworks] = useState([]);
 
@@ -59,11 +37,6 @@ function App() {
   //   }
   // })
 
-
-  const select = (ev)=>{
-    setMode(ev.target.id);
-  }
-
   const networkFetch = ()=>{
     setNetworks([
       {loading: true},
@@ -81,52 +54,51 @@ function App() {
   },[])
 
   return (
-    <div className="App" ref={appRef}>
+    <div className="App">
       <header className="Title">
         <div>
         <h1>Hello-Miki</h1>
-        <h2>{mode}</h2>
+        <h2>Version</h2>
         </div>
         <span className='Logo'>😻</span>
         {/* <img src={icon}/> */}
       </header>
       
-      <NetworkPicker networks={networks} onRefresh={()=>{
-        networkFetch();
-      }} />
-      
-      <nav className='Options'>
-        <ul className={'ContentContainer '}>
-          {/* <Option type="network" icon={iconWifi} onSelect={(ev)=>{
-            networkFetch()
-            select(ev)
-          }} 
-            title="Pick your WiFi">
-          </Option> */}
-          <Option type="monitor" icon={'Hear'} title={'Open Monitor'} onSelect={select}/>
+      <h1>Options</h1>
+      <NavBar onSelection={setMode}>
+        <NavSet>
+          <NavOption type="settings" icon={'Cog'} title="Settings" />
+          <NavOption type="logs" icon={'Hear'} title={'Open Log'} action />
+          <NavOption type="food" icon={'Food'} title={'Record Feed'} action />
           {/* <Option type="about" Icon={iconAbout} title={'About'} onSelect={select}/> */}
-        </ul>
-      </nav>
+        </NavSet>
 
-      {/* <section className='Content'>
-        <ul className={'ContentContainer '}>
-          <Option type="network" icon={iconWifi} onSelect={(ev)=>{
+        <NavSet from="settings" back>
+          <NavOption type="network" icon={'Wifi'} title='Choose Wifi' action={(ev)=>{
             networkFetch()
-            select(ev)
-          }} 
-            title="Pick your WiFi">
-          {
-          </Option>
-          <Option type="monitor" icon={iconMonitor} title={'Open Monitor'} onSelect={select}/>
-          <Option type="about" icon={iconAbout} title={'About'} onSelect={select}/>
-         
-        </ul>
-      </section> */}
+          }} />
+          <NavOption type="sensor" icon={'Cog'} title="Adjust Sensors"/>
+          <NavOption type="time" icon={'Time'} title="Set Time"/>
+        </NavSet>
 
-      {/* <nav className='Nav'>
-        <h2>Status: {status}</h2>
-      </nav> */}
+        <NavSet from="time" back="settings">
+          <NavOption type="fetch" icon={'Cog'} title="Fetch" action/>
+        </NavSet>
+      </NavBar>
+      
+      <section className='Content'>
+        <hr />
+        <CSSTransition unmountOnExit timeout={1000} in={mode === 'network'}>
+          <NetworkPicker networks={networks} onRefresh={()=>{
+            networkFetch();
+          }} /> 
+        </CSSTransition>
 
+        <CSSTransition unmountOnExit timeout={1000} in={mode !== 'network'}>
+          <EventMonitor monitorEvents={monitorEvents}/>
+        </CSSTransition>
+      </section>
+      
     </div>
   );
 }

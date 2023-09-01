@@ -6,18 +6,37 @@
   min-height: 100vh;
   min-height: 100dvh;
   background-color:white;
+
+  --ctheme-dark: rgb(0, 0, 0);
+  --ctheme: rgb(120, 189, 144);
+  --ctheme-light: rgb(147, 218, 189);
+  --ctheme-high: rgb(217, 255, 209);
 }
 
 .App > * {
   filter: drop-shadow(0 0 10px rgb(211, 196, 179));
+
 }
 
+.App .NetworkPicker {
+  --theme: var(--ctheme);
+  --theme-light: var(--ctheme-light);
+  --theme-high: var(--ctheme-high);
+  --theme-dark: var(--ctheme-dark);
+}
 
+/* hr {
+  width: 90%;
+} */
+ul {
+  padding: 0;
+  list-style: none;
+}
 button {
   border-radius: 0.45rem; 
-  border: solid darkgoldenrod 2px;
-  color:darkgoldenrod;
-  background-color: transparent;
+  border: none;
+  color:var(--ctheme-dark);
+  background-color: var(--ctheme);
   padding: 1rem;
   padding-block: 0.25rem;
   margin: 0.25rem;
@@ -26,27 +45,27 @@ button {
   transition: all 0.25s;
 }
 button:hover {
-  border-color: orange;
-  background-color: orange;
-  color: white;
+  background-color: var(--ctheme-high);
+  color: var(--ctheme-dark);
 }
 
 .Card {
-  background-color:khaki;
+  /* background-color: var(--ctheme-light); */
   border-radius: 0.45rem; 
   padding: 0.35rem;
 }
 
 
 .Title {
-  background-color:blanchedalmond;
-  padding: 1rem;
+  background-color:rgb(4, 41, 39);
+  color: white;
+  padding: 0 2rem;
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;
   align-items: center;
   gap:1rem;
-  line-height: 1;
+  line-height: 0.75;
   padding-block: 0;
 }
 .Title .Logo{
@@ -55,83 +74,44 @@ button:hover {
   max-height: 6rem;
 }
 
-.Nav {
-  background-color:bisque;
-  text-align: center;
+
+.NavBar {
+  position: relative;
+  perspective: 400px;
 }
 
+.NavBar {
+  --speed: 500ms;
+}
+.NavSet.enter {
+  opacity: 0;
+	transform: translateZ(-100px);
+}
+.NavSet.enter-active {
+	position:absolute;
+  inset: 0;
+  transition: opacity var(--speed), transform var(--speed);
+  opacity: 1;
+	transform: translateZ(0);
+}
+.NavSet.exit {
+  opacity: 1;
+	transform: translateZ(0);
+}
+.NavSet.exit-active {
+  transition: opacity var(--speed), transform var(--speed);
+  opacity: 0;
+	transform: translateZ(-100px);
+}
 
 
 .Content {
-  /* overflow-y: scroll; */
-  flex-grow: 1;
-}
-
-.ContentContainer {
-  height: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: max-content min-content;
-  grid-template-areas: 
-    "focus focus"
-    "opt opt";
-}
-
-.ContentContainer.Selected{
-  grid-template-rows: 1fr 12rem;
-}
-
-ul {
-  padding: 0;
-}
-.Option {
-  list-style: none;
   padding: 1rem;
-  margin: 1rem;
-  cursor: pointer;
-  user-select: none;
-
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  justify-content: space-between;
+  border-radius: 1rem;
 }
-
-.Option img {
-  max-height: 20vmin;
-}
-.Option .Back{
-  grid-area: back;
+.Content .NetworkPicker{
   padding: 0.25rem;
-  padding-inline: 1rem;  
-  background-color: pink;
 }
-.Option h2 {
-  font-weight: 400;
-  font-size: 1.5rem;
-  grid-area: title;
-}
-
-.Option.active {
-  background-color:antiquewhite;
-
-  display: grid;
-  grid-template-areas: 
-    "title title"
-    "content content"
-    "back extra";
-
-  /* grid-area: focus; */
-}
-.Option.active li {
-  background-color:rgb(224, 194, 174);
-  font-style: italic;
-}
-
-.Button.Refresh {
-  grid-area: extra;
-}
-
 
 
 .Events{

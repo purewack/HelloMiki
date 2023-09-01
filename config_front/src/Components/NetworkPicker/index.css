@@ -2,6 +2,8 @@
 	--theme: rgb(233, 203, 72);
 	--theme-light: rgb(250, 233, 155);
 	--theme-high: rgb(252, 246, 221);
+	--theme-dark: black;
+	color:  var(--theme-dark);
 	background-color: var(--theme);
 }
 .Networks {
@@ -39,7 +41,7 @@
 }
 .Networks .BtnRefresh:hover {
 	background-color: var(--theme-high);
-	color:black;
+	color:var(--theme-dark);
 }
 
 .Networks .Network  img{
