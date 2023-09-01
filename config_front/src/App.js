@@ -3,11 +3,7 @@ import { getNetworkList, getLocalPresence } from './REST.mock';
 
 import './App.css';
 import NetworkPicker from './Components/NetworkPicker/index';
-// import iconCat from './Res/cat-svgrepo-com.svg'
-// import iconSignal from './Res/signal-strong-svgrepo-com.svg'
-// import iconWifi from './Res/wifi-svgrepo-com.svg'
-// import iconAbout from './Res/question-svgrepo-com.svg'
-// import iconMonitor from './Res/ear-3-svgrepo-com.svg'
+import './Res/svg.css'
 
 function Option({onSelect, onActivated, type, title, icon, children}){
   const [active, setActive] = useState(false);
@@ -26,17 +22,12 @@ function Option({onSelect, onActivated, type, title, icon, children}){
         setActive(false)
         onSelect?.({target:{id:null}})
       }}>Back</button>
-    </> : <img src={icon}/>}
+    </> : <img className={'Icon SVG ' + icon} />}
     
   </li>
 }
 
 
-const catVoiceAlert = ()=>{
-  let msg = new SpeechSynthesisUtterance();
-  msg.text = "Meow Meow Meow, Meow please let me in";
-  window.speechSynthesis.speak(msg);
-}
 
 function App() {
 
@@ -104,7 +95,18 @@ function App() {
         networkFetch();
       }} />
       
-      
+      <nav className='Options'>
+        <ul className={'ContentContainer '}>
+          {/* <Option type="network" icon={iconWifi} onSelect={(ev)=>{
+            networkFetch()
+            select(ev)
+          }} 
+            title="Pick your WiFi">
+          </Option> */}
+          <Option type="monitor" icon={'Hear'} title={'Open Monitor'} onSelect={select}/>
+          {/* <Option type="about" Icon={iconAbout} title={'About'} onSelect={select}/> */}
+        </ul>
+      </nav>
 
       {/* <section className='Content'>
         <ul className={'ContentContainer '}>
@@ -114,31 +116,6 @@ function App() {
           }} 
             title="Pick your WiFi">
           {
-            networks && <>
-              <ul className='Networks'>
-                {networks.map((network,i) => {
-                  if(network.loading) 
-                    return <li className='Selection Card Loading' key={
-                      `net_load_${i}`
-                    }>...</li>
-                  else{
-                    let strength
-                    if(network.strength >= -40) strength = "Max"
-                    else if(network.strength >= -50) strength = "High"
-                    else if(network.strength >= -60) strength = "Med" 
-                    else strength = "Low"
-                    return <li className={'Selection Card '} key={
-                      `net_${network.ssid}_${network.channel}_${network.strength}`
-                    }>
-                      <span>{network.ssid}</span>
-                      <img src={iconSignal} className={'StrengthIcon ' + (strength)}/>
-                    </li>
-                  }
-                })}
-              </ul>
-              <button className='Button Refresh' onClick={networkFetch}>Refresh</button>
-              </>
-          }
           </Option>
           <Option type="monitor" icon={iconMonitor} title={'Open Monitor'} onSelect={select}/>
           <Option type="about" icon={iconAbout} title={'About'} onSelect={select}/>

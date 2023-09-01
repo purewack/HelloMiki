@@ -5,8 +5,8 @@ int connectToWifi(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void), v
 	File wpa = LittleFS.open("private/wpa.txt","r");
 	if(wpa){
 		char saved_psk[32] = {0};
-		wpa.readBytesUntil(',',saved_ssid,32);
-		wpa.readBytesUntil(',',saved_psk,32);
+		wpa.readBytesUntil('\n',saved_ssid,32);
+		wpa.readBytesUntil('\n',saved_psk,32);
 		Serial.println("--");
 		Serial.println(saved_ssid);
 		Serial.println(saved_psk);
@@ -39,9 +39,9 @@ void onNetworkChooseHandle(){
         File file = LittleFS.open("private/wpa.txt", "w");
         String wpa = "";
         file.print(server.arg("SSID"));
-        file.print(',');
+        file.print('\n');
         file.print(server.arg("PSK"));
-        file.print(',');
+        file.print('\n');
         file.close();
         server.sendHeader("Location", "/");
         server.sendHeader("Cache-Control", "no-cache");

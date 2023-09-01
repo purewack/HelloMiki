@@ -116,7 +116,7 @@ void notFoundHandle(){
     server.send(404, "text/plain", "File not found");
 }
 void onRootHandle(){
-  if(!fileRequestHandle("/index.html"))
+  if(!fileRequestHandle("index.html"))
     server.send(404, "text/plain", "File not found");
 }
 
