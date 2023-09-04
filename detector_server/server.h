@@ -15,10 +15,10 @@ extern ESP8266WebServer server;
 extern char saved_ssid[32];
 
 int connectToWifi(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void), void(*onNoConfig)(void));
-void onNetworkScanRequestHandle();
-void onNetworkChooseHandle();
-void forbiddenHandle();
-void notFoundHandle();
-void isPresentHandle();
-bool fileRequestHandle();
-void onRootHandle();
+void requestOnNetworkScan();
+void responseOnSaveNetworkCred();
+void requestOnForbidden();
+void requestOnMissing();
+void requestOnPresence();
+bool requestOnFilename();
+void requestOnIndex();

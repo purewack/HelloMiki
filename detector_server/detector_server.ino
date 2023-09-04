@@ -1,6 +1,7 @@
 #include "hardware.h"
 #include "monitor.h"
 #include "server.h"
+#include "sensor.h"
 Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);
 ESP8266WebServer server(80);
 char saved_ssid[32];
@@ -90,15 +91,16 @@ void setup() {
   MDNS.addService("http", "tcp", 80);
   
   server.enableCORS(true);
-  server.onNotFound(notFoundHandle);
-  server.on("/", onRootHandle);
+  server.onNotFound(requestOnMissing);
+  server.on("/", requestOnIndex);
 
-  server.on("/scan", isPresentHandle);
+  server.on("/scan", requestOnPresence);
+  server.on("/scan/debug", requestOnSensorList);
 
-  // server.on("/private/*", forbiddenHandle);
-  server.on("/network", onNetworkScanRequestHandle); 
+  // server.on("/private/*", requestOnForbidden);
+  server.on("/network", requestOnNetworkScan); 
   server.on("/network/select", [=](){
-    onNetworkChooseHandle();
+    responseOnSaveNetworkCred();
     display.clearDisplay();
     display.setCursor(0,0);
     display.println("Trying Wifi");
@@ -107,21 +109,21 @@ void setup() {
   server.begin();
 
 }
-void forbiddenHandle(){
+void requestOnForbidden(){
   server.send(403, "text/plain", "Forbidden access");
 }
-void notFoundHandle(){
+void requestOnMissing(){
   String uri = ESP8266WebServer::urlDecode(server.uri());  // required to read paths with blanks
-  if(!fileRequestHandle(uri))
+  if(!requestOnFilename(uri))
     server.send(404, "text/plain", "File not found");
 }
-void onRootHandle(){
-  if(!fileRequestHandle("index.html"))
+void requestOnIndex(){
+  if(!requestOnFilename("index.html"))
     server.send(404, "text/plain", "File not found");
 }
 
 
-bool fileRequestHandle(String path) {
+bool requestOnFilename(String path) {
   String contentType;
   if (server.hasArg("download")) {
     contentType = F("application/octet-stream");
@@ -156,7 +158,8 @@ void loop() {
   //   display.println("Scanning..");
   //   display.display();
   // }
-  
+  // inspectPollZonesBlocking();
+  // delay(500);
   server.handleClient();
   MDNS.update();
 }

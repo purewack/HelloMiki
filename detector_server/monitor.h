@@ -1,5 +1,5 @@
 #pragma once
-void isPresentHandle();
+void requestOnPresence();
 void updateMonitor();
 bool didEnterPresence();
 bool didLeavePresence();

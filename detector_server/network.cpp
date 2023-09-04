@@ -34,7 +34,7 @@ int connectToWifi(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void), v
 	return 0;
 }
 
-void onNetworkChooseHandle(){
+void responseOnSaveNetworkCred(){
     if(server.hasArg("SSID") && server.hasArg("PSK")){
         File file = LittleFS.open("private/wpa.txt", "w");
         String wpa = "";
@@ -49,7 +49,7 @@ void onNetworkChooseHandle(){
     }
 }
 
-void onNetworkScanRequestHandle(){
+void requestOnNetworkScan(){
     String resp_json;
     int scanResult;
 

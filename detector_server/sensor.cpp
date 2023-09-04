@@ -70,11 +70,11 @@ void inspectPollZonesBlocking(){
             int eventType = zone.poll();
             Serial.print("zone: "); Serial.println(zone.zone);
             Serial.print("eventType: "); Serial.println(eventType);
-            Serial.print("presence"); Serial.println(zone.presence.poll());
-            Serial.print("triggerEnter"); Serial.println(zone.triggerEnter.poll());
-            Serial.print("triggerEnterHuman"); Serial.println(zone.triggerEnterHuman.poll());
-            Serial.print("triggerExit"); Serial.println(zone.triggerExit.poll());
-            Serial.print("triggerExitHuman"); Serial.println(zone.triggerExitHuman.poll());
+            Serial.print("presence: "); Serial.println(zone.presence.poll());
+            Serial.print("triggerEnter: "); Serial.println(zone.triggerEnter.poll());
+            Serial.print("triggerEnterHuman: "); Serial.println(zone.triggerEnterHuman.poll());
+            Serial.print("triggerExit: "); Serial.println(zone.triggerExit.poll());
+            Serial.print("triggerExitHuman: "); Serial.println(zone.triggerExitHuman.poll());
         Serial.println("}");
     }
     Serial.println("}");
