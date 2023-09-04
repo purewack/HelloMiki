@@ -2,21 +2,8 @@
     "version": 4,
     "configurations": [
         {
-            "name": "Mac",
-            "compilerPath": "/usr/bin/clang",
-            "compilerArgs": [],
-            "intelliSenseMode": "",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
-            "forcedInclude": [],
-            "cStandard": "c17",
-            "cppStandard": "c++17",
-            "defines": []
-        },
-        {
             "name": "Arduino",
-            "compilerPath": "/home/damian/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.1.0-gcc10.3-e5f9fec/bin/xtensa-lx106-elf-g++",
+            "compilerPath": "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.1.0-gcc10.3-e5f9fec\\bin\\xtensa-lx106-elf-g++",
             "compilerArgs": [
                 "-U__STRICT_ANSI__",
                 "-free",
@@ -30,29 +17,29 @@
             ],
             "intelliSenseMode": "gcc-x64",
             "includePath": [
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/sdk/include",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/sdk/lwip2/include",
-                "/tmp/arduino/sketches/4CF18ACDFED34C98CF1F89B0FD7178A2/core",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/cores/esp8266",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/variants/nodemcu",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/LittleFS/src",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/Wire",
-                "/home/damian/Arduino/libraries/Adafruit_GFX_Library",
-                "/home/damian/Arduino/libraries/Adafruit_BusIO",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/SPI",
-                "/home/damian/Arduino/libraries/Adafruit_SH110X",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/ESP8266WiFi/src",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/ESP8266WebServer/src",
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/ESP8266mDNS/src",
-                "/home/damian/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.1.0-gcc10.3-e5f9fec/xtensa-lx106-elf/include/c++/10.3.0",
-                "/home/damian/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.1.0-gcc10.3-e5f9fec/xtensa-lx106-elf/include/c++/10.3.0/xtensa-lx106-elf",
-                "/home/damian/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.1.0-gcc10.3-e5f9fec/xtensa-lx106-elf/include/c++/10.3.0/backward",
-                "/home/damian/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.1.0-gcc10.3-e5f9fec/lib/gcc/xtensa-lx106-elf/10.3.0/include",
-                "/home/damian/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.1.0-gcc10.3-e5f9fec/lib/gcc/xtensa-lx106-elf/10.3.0/include-fixed",
-                "/home/damian/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.1.0-gcc10.3-e5f9fec/xtensa-lx106-elf/include"
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\tools\\sdk\\include",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\tools\\sdk\\lwip2\\include",
+                "c:\\Users\\motiv\\Documents\\GitHub\\hellomiki\\.build\\core",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\cores\\esp8266",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\variants\\nodemcu",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\LittleFS\\src",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\Wire",
+                "C:\\Users\\motiv\\Documents\\Arduino\\libraries\\Adafruit_GFX_Library",
+                "C:\\Users\\motiv\\Documents\\Arduino\\libraries\\Adafruit_BusIO",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\SPI",
+                "C:\\Users\\motiv\\Documents\\Arduino\\libraries\\Adafruit_SH110X",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\ESP8266WiFi\\src",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\ESP8266WebServer\\src",
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\ESP8266mDNS\\src",
+                "c:\\users\\motiv\\appdata\\local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.1.0-gcc10.3-e5f9fec\\xtensa-lx106-elf\\include\\c++\\10.3.0",
+                "c:\\users\\motiv\\appdata\\local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.1.0-gcc10.3-e5f9fec\\xtensa-lx106-elf\\include\\c++\\10.3.0\\xtensa-lx106-elf",
+                "c:\\users\\motiv\\appdata\\local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.1.0-gcc10.3-e5f9fec\\xtensa-lx106-elf\\include\\c++\\10.3.0\\backward",
+                "c:\\users\\motiv\\appdata\\local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.1.0-gcc10.3-e5f9fec\\lib\\gcc\\xtensa-lx106-elf\\10.3.0\\include",
+                "c:\\users\\motiv\\appdata\\local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.1.0-gcc10.3-e5f9fec\\lib\\gcc\\xtensa-lx106-elf\\10.3.0\\include-fixed",
+                "c:\\users\\motiv\\appdata\\local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.1.0-gcc10.3-e5f9fec\\xtensa-lx106-elf\\include"
             ],
             "forcedInclude": [
-                "/home/damian/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/cores/esp8266/Arduino.h"
+                "C:\\Users\\motiv\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\cores\\esp8266\\Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",

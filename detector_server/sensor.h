@@ -26,6 +26,6 @@ struct SensorZone {
     int poll();
 };
 
-SensorZone zones[2];
+extern SensorZone zones[2];
 void pollZones();
 void inspectPollZonesBlocking();
