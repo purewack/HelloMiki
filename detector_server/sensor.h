@@ -27,7 +27,6 @@ struct SensorZone {
 };
 
 extern SensorZone zones[2];
-void requestOnSensorList();
 void setupZonePins();
 void pollZones();
 void inspectPollZonesBlocking();

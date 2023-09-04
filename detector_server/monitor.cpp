@@ -6,7 +6,7 @@
 bool meow = false;
 bool meowOld = false;
 
-void requestOnPresence(){
+void requestOnStatusPresence(){
   String resp;
   JSON_OBJECT(resp,
     if(meow && !meowOld){

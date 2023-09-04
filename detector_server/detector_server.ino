@@ -94,8 +94,6 @@ void setup() {
   server.onNotFound(requestOnMissing);
   server.on("/", requestOnIndex);
 
-  server.on("/scan", requestOnPresence);
-  server.on("/scan/debug", requestOnSensorList);
 
   // server.on("/private/*", requestOnForbidden);
   server.on("/network", requestOnNetworkScan); 
@@ -106,39 +104,13 @@ void setup() {
     display.println("Trying Wifi");
     connectToWifi(wifiWaitDisplay, wifiOkDisplay, wifiFailDisplay, nullptr);
   });
+  
+  server.on("/status/presence", requestOnStatusPresence);
+  server.on("/status/storage",  requestOnStatusStorage);
+  server.on("/status/sensors",  requestOnStatusSensors);
+  server.on("/status/network",  requestOnStatusNetwork);
   server.begin();
 
-}
-void requestOnForbidden(){
-  server.send(403, "text/plain", "Forbidden access");
-}
-void requestOnMissing(){
-  String uri = ESP8266WebServer::urlDecode(server.uri());  // required to read paths with blanks
-  if(!requestOnFilename(uri))
-    server.send(404, "text/plain", "File not found");
-}
-void requestOnIndex(){
-  if(!requestOnFilename("index.html"))
-    server.send(404, "text/plain", "File not found");
-}
-
-
-bool requestOnFilename(String path) {
-  String contentType;
-  if (server.hasArg("download")) {
-    contentType = F("application/octet-stream");
-  } else {
-    contentType = mime::getContentType(path);
-  }
-
-  if (LittleFS.exists(path)) {
-    File file = LittleFS.open(path, "r");
-    server.streamFile(file, contentType);
-    file.close();
-    return true;
-  }
-
-  return false;
 }
 
 void loop() {

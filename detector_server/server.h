@@ -17,8 +17,13 @@ extern char saved_ssid[32];
 int connectToWifi(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void), void(*onNoConfig)(void));
 void requestOnNetworkScan();
 void responseOnSaveNetworkCred();
+
 void requestOnForbidden();
 void requestOnMissing();
-void requestOnPresence();
-bool requestOnFilename();
 void requestOnIndex();
+bool requestOnFilename(String path);
+void requestOnStatusStorage();
+
+void requestOnStatusNetwork();
+void requestOnStatusSensors();
+void requestOnStatusPresence();

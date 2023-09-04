@@ -77,3 +77,11 @@ void requestOnNetworkScan(){
         server.send(200, "text/json", "[]");
     } 
 }
+
+void requestOnStatusNetwork(){
+    String json;
+    JSON_OBJECT(json,
+        
+    );
+    server.send(200, "text/json",   json);
+}

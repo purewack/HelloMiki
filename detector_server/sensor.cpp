@@ -1,5 +1,6 @@
+#include "server.h"
 #include "sensor.h"
-#include <Arduino.h>
+#include "StringJSON.h"
 
 
 bool Sensor::poll(){
@@ -78,4 +79,12 @@ void inspectPollZonesBlocking(){
         Serial.println("}");
     }
     Serial.println("}");
+}
+
+void requestOnStatusSensors(){
+    String json;
+    JSON_OBJECT(json,
+        
+    );
+    server.send(200, "text/json",   json);
 }
