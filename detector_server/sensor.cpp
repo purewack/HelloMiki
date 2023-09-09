@@ -19,38 +19,34 @@ int SensorZone::poll(){
     return 0;
 }
 
-void SensorZone::list(){
-    Serial.println("Sensor Group {");
-        Serial.print("zone: "); Serial.println(zone);
-        Serial.print("reverse: "); Serial.println(reverseTriggerDirection);
+String SensorZone::toJSON(){
+    auto listTrigger = [](String &s, auto trigger){
+        JSON_OBJECT(s, 
+            JSON_KV(s, "id", trigger.id);
+                JSON_NEXT(s);
+            JSON_KV(s, "type", trigger.type);
+                JSON_NEXT(s);
+            JSON_KV(s, "port_pin", trigger.port.pin);
+                JSON_NEXT(s);
+            JSON_KV(s, "port_invert", trigger.port.invert);
+        );
+    };
 
-        auto listTrigger = [](auto trigger){
-            Serial.print("id: "); Serial.println(trigger.id);
-            Serial.print("type: "); Serial.println(trigger.type);
-            Serial.print("port_pin: "); Serial.println(trigger.port.pin);
-            Serial.print("port_invert: "); Serial.println(trigger.port.invert);
-        };
-
-        Serial.println("presence: {");  
-            listTrigger(presence);
-        Serial.println("}"); 
-
-        Serial.println("triggerEnter: {");  
-            listTrigger(triggerEnter);
-        Serial.println("}"); 
-
-        Serial.println("triggerEnterHuman: {");  
-            listTrigger(triggerEnterHuman);
-        Serial.println("}"); 
-
-        Serial.println("triggerExit: {");  
-            listTrigger(triggerExit);
-        Serial.println("}"); 
-
-        Serial.println("triggerExitHuman: {");  
-            listTrigger(triggerExitHuman);
-        Serial.println("}"); 
-    Serial.println("}"); 
+    String json;
+    JSON_OBJECT(json,
+        JSON_KV_STR(json, "zone", zone);
+            JSON_NEXT(json);
+        JSON_KV(json, "reverse", JBOOL(reverseTriggerDirection));
+            JSON_NEXT(json);
+        JSON_KV_F(json,"triggerEnter",listTrigger(json,triggerEnter));
+            if(!mono){
+            JSON_NEXT(json);
+        JSON_KV_F(json,"triggerExit",listTrigger(json,triggerExit));
+            JSON_NEXT(json);
+        JSON_KV_F(json,"triggerCancel",listTrigger(json,triggerCancel));
+            }
+    );
+    return json;
 }
 
 
@@ -71,11 +67,9 @@ void inspectPollZonesBlocking(){
             int eventType = zone.poll();
             Serial.print("zone: "); Serial.println(zone.zone);
             Serial.print("eventType: "); Serial.println(eventType);
-            Serial.print("presence: "); Serial.println(zone.presence.poll());
             Serial.print("triggerEnter: "); Serial.println(zone.triggerEnter.poll());
-            Serial.print("triggerEnterHuman: "); Serial.println(zone.triggerEnterHuman.poll());
             Serial.print("triggerExit: "); Serial.println(zone.triggerExit.poll());
-            Serial.print("triggerExitHuman: "); Serial.println(zone.triggerExitHuman.poll());
+            Serial.print("triggerCancel: "); Serial.println(zone.triggerCancel.poll());
         Serial.println("}");
     }
     Serial.println("}");
@@ -83,8 +77,10 @@ void inspectPollZonesBlocking(){
 
 void requestOnStatusSensors(){
     String json;
-    JSON_OBJECT(json,
-        
+    JSON_ARRAY(json,
+        json += zones[0].toJSON();
+            JSON_NEXT(json);
+        json += zones[1].toJSON();
     );
     server.send(200, "text/json",   json);
 }

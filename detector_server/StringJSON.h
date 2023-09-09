@@ -29,4 +29,8 @@
     ADDTO += V; \
     ADDTO += QQ; 
 
+#define JSON_KV_F(ADDTO, K,F) \
+    ADDTO += JSTR(K) SS; \
+    F;
+
 #define JSON_NEXT(ADDTO) ADDTO += CC;

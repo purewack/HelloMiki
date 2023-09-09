@@ -81,7 +81,11 @@ void requestOnNetworkScan(){
 void requestOnStatusNetwork(){
     String json;
     JSON_OBJECT(json,
-        
+        if(WiFi.isConnected()){
+            JSON_KV_STR(json,"ssid",WiFi.SSID());
+                JSON_NEXT(json);
+            JSON_KV(json, "strength", WiFi.RSSI());
+        }
     );
     server.send(200, "text/json",   json);
 }

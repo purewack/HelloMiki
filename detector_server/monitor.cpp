@@ -1,6 +1,5 @@
 #include "server.h"
-#include "hardware.h"
-#include "monitor.h"
+#include "sensor.h"
 #include "StringJSON.h"
 
 bool meow = false;
@@ -23,7 +22,7 @@ void requestOnStatusPresence(){
 }
 
 void updateMonitor(){
-  meow = digitalRead(PIN_SENSE);
+  // meow = digitalRead(PIN_SENSE);
 }
 
 bool didEnterPresence(){

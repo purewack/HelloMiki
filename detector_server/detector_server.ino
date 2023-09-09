@@ -1,5 +1,4 @@
-#include "hardware.h"
-#include "monitor.h"
+
 #include "server.h"
 #include "sensor.h"
 Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);
@@ -7,17 +6,16 @@ ESP8266WebServer server(80);
 char saved_ssid[32];
 
 void setup() {
+  // pinMode(PIN_LED, OUTPUT);
+  // pinMode(PIN_SENSE, INPUT);
+  // pinMode(PIN_SPEAK, OUTPUT);
+
   Serial.begin(19200);
   display.begin(0x3C, true); // Address 0x3C default
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SH110X_WHITE);
   display.display();
-
-  // Clear the buffer.
-  pinMode(PIN_LED, OUTPUT);
-  pinMode(PIN_SENSE, INPUT);
-  pinMode(PIN_SPEAK, OUTPUT);
 
   WiFi.mode(WIFI_AP_STA);
   WiFi.disconnect();
