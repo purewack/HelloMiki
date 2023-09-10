@@ -2,13 +2,12 @@
 #include "server.h"
 #include "sensor.h"
 Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);
-ESP8266WebServer server(80);
+AsyncWebServer server(80);
+AsyncWebSocket ws("/monitor");
 char saved_ssid[32];
 
 void setup() {
-  // pinMode(PIN_LED, OUTPUT);
-  // pinMode(PIN_SENSE, INPUT);
-  // pinMode(PIN_SPEAK, OUTPUT);
+  setupMonitor();
 
   Serial.begin(19200);
   display.begin(0x3C, true); // Address 0x3C default
@@ -87,49 +86,35 @@ void setup() {
 
   MDNS.begin("hellomiki");
   MDNS.addService("http", "tcp", 80);
-  
-  server.enableCORS(true);
-  server.onNotFound(requestOnMissing);
-  server.on("/", requestOnIndex);
 
-
-  // server.on("/private/*", requestOnForbidden);
-  server.on("/network", requestOnNetworkScan); 
-  server.on("/network/select", [=](){
-    responseOnSaveNetworkCred();
-    display.clearDisplay();
-    display.setCursor(0,0);
-    display.println("Trying Wifi");
-    connectToWifi(wifiWaitDisplay, wifiOkDisplay, wifiFailDisplay, nullptr);
-  });
-  
-  server.on("/status/presence", requestOnStatusPresence);
-  server.on("/status/storage",  requestOnStatusStorage);
-  server.on("/status/sensors",  requestOnStatusSensors);
-  server.on("/status/network",  requestOnStatusNetwork);
+  server.on("/network", requestOnStatusNetwork); 
+  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+  server.addHandler(&ws);
   server.begin();
+
+  // server.enableCORS(true);
+  // server.onNotFound(requestOnMissing);
+  // server.on("/", requestOnIndex);
+
+
+  // // server.on("/private/*", requestOnForbidden);
+  // server.on("/network", requestOnNetworkScan); 
+  // server.on("/network/select", [=](){
+  //   responseOnSaveNetworkCred();
+  //   display.clearDisplay();
+  //   display.setCursor(0,0);
+  //   display.println("Trying Wifi");
+  //   connectToWifi(wifiWaitDisplay, wifiOkDisplay, wifiFailDisplay, nullptr);
+  // });
+  
+  // server.on("/status/storage",  requestOnStatusStorage);
+  // server.on("/status/network",  requestOnStatusNetwork);
+  // server.begin();
 
 }
 
 void loop() {
-  // updateMonitor();
-
-  // if(didEnterPresence()){
-  //   display.clearDisplay();
-  //   display.setCursor(0,0);
-  //   display.setTextSize(4);
-  //   display.println("Meow");
-  //   display.display();
-  // }
-  // else if(didLeavePresence()){
-  //   display.clearDisplay();
-  //   display.setCursor(0,0);
-  //   display.setTextSize(2);
-  //   display.println("Scanning..");
-  //   display.display();
-  // }
-  // inspectPollZonesBlocking();
-  // delay(500);
-  server.handleClient();
+  updateMonitor();
+  ws.cleanupClients();
   MDNS.update();
 }

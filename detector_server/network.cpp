@@ -34,22 +34,23 @@ int connectToWifi(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void), v
 	return 0;
 }
 
-void responseOnSaveNetworkCred(){
-    if(server.hasArg("SSID") && server.hasArg("PSK")){
+void responseOnSaveNetworkCred(AsyncWebServerRequest* request){
+    if(request->hasArg("SSID") && request->hasArg("PSK")){
         File file = LittleFS.open("private/wpa.txt", "w");
         String wpa = "";
-        file.print(server.arg("SSID"));
+        file.print(request->arg("SSID"));
         file.print('\n');
-        file.print(server.arg("PSK"));
+        file.print(request->arg("PSK"));
         file.print('\n');
         file.close();
-        server.sendHeader("Location", "/");
-        server.sendHeader("Cache-Control", "no-cache");
-        server.send(301);
+        auto response = request->beginResponse_P(301, "text/html", "");
+        response->addHeader("Location", "/");
+        response->addHeader("Cache-Control", "no-cache");
+        request->send(response);
     }
 }
 
-void requestOnNetworkScan(){
+void requestOnNetworkScan(AsyncWebServerRequest* request){
     String resp_json;
     int scanResult;
 
@@ -72,13 +73,13 @@ void requestOnNetworkScan(){
                 )
             }
         );
-        server.send(200, "text/json", resp_json);
+        request->send(200, "text/json", resp_json);
     } else {
-        server.send(200, "text/json", "[]");
+        request->send(200, "text/json", "[]");
     } 
 }
 
-void requestOnStatusNetwork(){
+void requestOnStatusNetwork(AsyncWebServerRequest* request){
     String json;
     JSON_OBJECT(json,
         if(WiFi.isConnected()){
@@ -87,5 +88,5 @@ void requestOnStatusNetwork(){
             JSON_KV(json, "strength", WiFi.RSSI());
         }
     );
-    server.send(200, "text/json",   json);
+    request->send(200, "text/plain", json);
 }
