@@ -2,47 +2,28 @@
 #include "StringJSON.h"
 
 int connectToWifi(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void), void(*onNoConfig)(void)){
-	File wpa = LittleFS.open("private/wpa.txt","r");
-	if(wpa){
-		char saved_psk[32] = {0};
-		wpa.readBytesUntil('\n',saved_ssid,32);
-		wpa.readBytesUntil('\n',saved_psk,32);
-		Serial.println("--");
-		Serial.println(saved_ssid);
-		Serial.println(saved_psk);
-		Serial.println("--");
-		wpa.close();
-		WiFi.disconnect();
-		WiFi.begin(saved_ssid,saved_psk);
-
-		int tries = 0;
-		int try_count = 15;
-		while (WiFi.status() != WL_CONNECTED ) {
-			tries++;
-			if(tries >= try_count){
-				if(onFail) onFail();
-				return -1;
-			}
-			if(onWait) onWait();
-			delay(500);
-		}
-		if(onOk) onOk();
-		return 1;
-	}
-
-	if(onNoConfig) onNoConfig();
-	return 0;
+    // WiFi.begin();
+    int tries = 0;
+    int try_count = 15;
+    while (WiFi.status() != WL_CONNECTED ) {
+        tries++;
+        if(tries >= try_count){
+            if(onFail) onFail();
+            return -1;
+        }
+        if(onWait) onWait();
+        delay(500);
+    }
+    if(onOk) onOk();
+    return 1;
 }
 
 void responseOnSaveNetworkCred(AsyncWebServerRequest* request){
     if(request->hasArg("SSID") && request->hasArg("PSK")){
-        File file = LittleFS.open("private/wpa.txt", "w");
-        String wpa = "";
-        file.print(request->arg("SSID"));
-        file.print('\n');
-        file.print(request->arg("PSK"));
-        file.print('\n');
-        file.close();
+        
+        WiFi.disconnect();
+        WiFi.begin(request->arg("SSID"),request->arg("PSK"));
+
         auto response = request->beginResponse_P(301, "text/html", "");
         response->addHeader("Location", "/");
         response->addHeader("Cache-Control", "no-cache");
@@ -54,7 +35,7 @@ void requestOnNetworkScan(AsyncWebServerRequest* request){
     String resp_json;
     int scanResult;
 
-    scanResult = WiFi.scanNetworks(/*async=*/false, /*hidden=*/false);
+    scanResult = WiFi.scanNetworks();
 
     if (scanResult > 0) {
         JSON_ARRAY(resp_json, 
