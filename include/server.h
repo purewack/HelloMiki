@@ -15,10 +15,21 @@
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;
 
+
+enum NetState {
+    NET_IDLE,
+    NET_BUSY,
+    NET_CONNECTING,
+    NET_TRY,
+    NET_BOOT,
+    NET_OK,
+    NET_FAIL,
+    NET_NULL
+};
 void networkSignalBootConnect();
 void networkSignalForget();
 void networkSignalConnectTo(String ssid, String psk);
-void networkWatchdog(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void));
+void networkWatchdog(void(*onWifiState)(NetState state));
 
 void requestOnNetworkScan(AsyncWebServerRequest* request);
 void responseOnSaveNetworkCred(AsyncWebServerRequest* request);

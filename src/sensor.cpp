@@ -42,7 +42,7 @@ void setupMonitor(){
     sensors[1].pin = D6;
 }
 
-void monitorWatchdog(){
+void monitorWatchdog(void(*onSense)(void)){
 
     sensors[0].poll();
     sensors[1].poll();
@@ -50,26 +50,30 @@ void monitorWatchdog(){
     digitalWrite(LED_BUILTIN,!hasSense);
 
 if(hasSense){
+    if(onSense) onSense();
     if(!ws.availableForWriteAll()) return;
     String json;
     JSON_ARRAY(json,
-        JSON_OBJECT(json,
-            if(sensors[0].state){
+        if(sensors[0].state){
+            JSON_OBJECT(json,
                 sensors[0].eventUnspent = false;
                 JSON_KV(json,"sensor_id",0);
                     JSON_NEXT(json);
                 JSON_KV(json,"server_timestamp",sensors[0].whenRising);
-            }
-        );
+            );
+        }
+
+        if(sensors[0].state && sensors[1].state)
         JSON_NEXT(json);
-        JSON_OBJECT(json,
-            if(sensors[1].state){
+
+        if(sensors[1].state){
+            JSON_OBJECT(json,
                 sensors[1].eventUnspent = false;
                 JSON_KV(json,"sensor_id",1);
                     JSON_NEXT(json);
                 JSON_KV(json,"server_timestamp",sensors[1].whenRising);
-            }
-        );
+            );
+        }
     );
     ws.printfAll(json.c_str());
 }

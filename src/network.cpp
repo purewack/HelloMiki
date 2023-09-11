@@ -5,26 +5,25 @@
 String saved_ssid;
 String saved_psk;
 
-int networkSignal = 0;
+NetState networkState = NET_IDLE;
 void networkSignalConnectTo(String ssid, String psk){
-    networkSignal = 1;
+    networkState = NET_TRY;
     saved_ssid = ssid;
     saved_psk = psk;
 }
 void networkSignalBootConnect(){
-    networkSignal = 2;
+    networkState = NET_BOOT;
 }
 void networkSignalForget(){
 
 }
 
-int isConnecting = false;
+int connnectionCounter = false;
 unsigned long lastConnectTimeout = 0;    
 const char wpaSeparator = ',';
 
-void networkWatchdog(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void)){
-    if(networkSignal == 1){
-        networkSignal = 0;
+void networkWatchdog(void(*onWifiState)(NetState state)){
+    if(networkState == NET_TRY){
         File file = LittleFS.open("private/wpa.txt", "w");
         String wpa = "";
         file.print(saved_ssid);
@@ -35,11 +34,9 @@ void networkWatchdog(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void)
 
         WiFi.disconnect();
         WiFi.begin(saved_ssid,saved_psk);
-        isConnecting = 1;
+        networkState = NET_BUSY;
     }
-    else if(networkSignal == 2){
-        networkSignal = 0;
-        Serial.println("connect 2");
+    else if(networkState == NET_BOOT){
         File wpa = LittleFS.open("private/wpa.txt","r");
         if(wpa){
             {
@@ -55,30 +52,35 @@ void networkWatchdog(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void)
             wpa.close();
             WiFi.disconnect();
             WiFi.begin(saved_ssid,saved_psk);
-            isConnecting = 1;
+            networkState = NET_BUSY;
         }
         else{
-            isConnecting = false;
-            if(onFail) onFail();
+            networkState = NET_NULL;
+            onWifiState(NET_NULL);
         }
     }
     
-    if(isConnecting){
+    if(networkState == NET_BUSY){
+        networkState = NET_CONNECTING;
+        connnectionCounter = 0;
+        lastConnectTimeout = millis() + 1000;
+        onWifiState(NET_CONNECTING);
+    }
+    if(networkState == NET_CONNECTING){
         if (WiFi.status() != WL_CONNECTED ) {
             auto now = millis();
             if(now > lastConnectTimeout + 500){
                 lastConnectTimeout = now;
-                isConnecting++;
-                if(isConnecting >= 30){
-                    isConnecting = false;
-                    if(onFail) onFail();
+                connnectionCounter++;
+                if(connnectionCounter >= 30){  
+                    networkState = NET_FAIL;
+                    onWifiState(NET_FAIL);
                 }
-                if(onWait) onWait();
             }
         }
         else {
-            if(onOk) onOk();
-            isConnecting = false;
+            networkState = NET_OK;
+            onWifiState(NET_OK);
         }
     }
 }

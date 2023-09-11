@@ -5,10 +5,6 @@ Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws/monitor");
 
-void wifiWaitDisplay();
-void wifiOkDisplay();
-void wifiFailDisplay();
-
 void setup() {
   setupMonitor();
 
@@ -37,58 +33,47 @@ void setup() {
 
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP("HelloMiki_AP");
-  display.println("WiFi Connecting");
   networkSignalBootConnect();
 }
 
+
+NetState wifiState = NET_IDLE;
 void loop() {
-  monitorWatchdog();
-  networkWatchdog(wifiWaitDisplay, wifiOkDisplay, wifiFailDisplay);
   ws.cleanupClients();
   MDNS.update();
+
+  monitorWatchdog();
+  networkWatchdog([](NetState state){
+    wifiState = state;
+  });
+
+  if(wifiState != NET_IDLE){
+    auto s = wifiState;
+    wifiState = NET_IDLE;
+    display.clearDisplay();
+    display.setCursor(0,0);
+    
+    switch (s){
+      case NET_CONNECTING:
+        display.println("Connecting to:");
+        display.println(WiFi.SSID());
+        break;
+      
+      case NET_OK:
+        display.println("WiFI: OK");
+        display.println(WiFi.localIP().toString());
+        break;
+      
+      case NET_FAIL:
+        display.println("WiFI: Failed");
+        display.println(WiFi.softAPIP().toString());
+        break;
+
+      case NET_NULL:
+        display.println("Network unset");
+        display.println(WiFi.softAPIP().toString());
+        break;
+    }
+    display.display();
+  }
 }
-
-
-void wifiWaitDisplay(){
-  display.print(".");
-  display.display();
-};
-void wifiOkDisplay(){
-  display.clearDisplay();
-  display.setCursor(0,0);
-  display.setTextSize(1);
-    
-    display.println("Hello Miki!");
-    display.println("");
-
-    display.println("Connected :)");
-    display.println("");
-
-    display.println(WiFi.SSID());
-    display.println("IP:");
-    display.print(" > ");
-    display.println(WiFi.localIP());
-
-    if(!LittleFS.exists("/public/index.html"))
-      display.println("No index.html");
-  display.display();
-};
-void wifiFailDisplay(){
-  display.clearDisplay();
-  display.setCursor(0,0);
-  display.setTextSize(1);
-    
-    display.println("Hello Miki!");
-    display.println("");
-
-    display.println("Wifi Failed :O");
-    display.println("");
-
-    display.println("Config IP:");
-    display.print(" > ");
-    display.println(WiFi.softAPIP());
-    
-    if(!LittleFS.exists("/public/index.html"))
-      display.println("No index.html");
-  display.display();
-};

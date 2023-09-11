@@ -1,4 +1,4 @@
 #pragma once
 
-void monitorWatchdog();
+void monitorWatchdog(void(*onSense)(void) = nullptr);
 void setupMonitor();
