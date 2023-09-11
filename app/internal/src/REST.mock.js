@@ -12,3 +12,25 @@ export function getNetworkList(){
         },1000);
     })
 }
+
+
+export function getNetworkState(){
+    return new Promise((resolve, rej)=>{
+        setTimeout(()=>{
+            resolve(
+                {ssid:"network3", strength:-70}
+            )
+        },1000);
+    })
+}
+
+export function getPastEvents(){
+    return new Promise((resolve, rej)=>{
+        setTimeout(()=>{
+            resolve([
+                {direction:'leaving',  time: new Date().toUTCString()},
+                {direction:'entering', time: new Date().toUTCString()}
+            ])
+        },1000);
+    })
+}

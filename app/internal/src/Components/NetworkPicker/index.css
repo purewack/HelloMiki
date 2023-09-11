@@ -5,6 +5,7 @@
 	--theme-dark: black;
 	color:  var(--theme-dark);
 	background-color: var(--theme);
+	width: 100%;
 }
 .Networks {
 	width: 100%;

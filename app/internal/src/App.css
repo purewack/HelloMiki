@@ -7,16 +7,18 @@
   min-height: 100dvh;
   background-color:white;
 
+  position: relative;
+
   --ctheme-dark: rgb(0, 0, 0);
   --ctheme: rgb(120, 189, 144);
   --ctheme-light: rgb(147, 218, 189);
   --ctheme-high: rgb(217, 255, 209);
 }
 
-.App > * {
+/* .App > * {
   filter: drop-shadow(0 0 10px rgb(211, 196, 179));
 
-}
+} */
 
 .App .NetworkPicker {
   --theme: var(--ctheme);
@@ -66,12 +68,13 @@ button:hover {
   align-items: center;
   gap:1rem;
   line-height: 0.75;
-  padding-block: 0;
 }
 .Title .Logo{
   display: inline-block;
   font-size: 6rem;
   max-height: 6rem;
+  align-self: flex-start;
+  transform: translateY(25%);
 }
 
 

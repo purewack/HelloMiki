@@ -1,0 +1,28 @@
+.PopUp{
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(0,0,0,0.3);
+    padding: 1rem;
+}
+
+.PopUp .ExitButton {
+    width: 5rem;
+    height: 5rem;
+}
+
+.PopUp.enter {
+    opacity: 0;
+}
+.PopUp.enter-active {
+    opacity: 1;
+    transition: opacity 500ms;
+}
+.PopUp.exit {
+    opacity: 0;
+    transition: opacity 500ms;
+}
