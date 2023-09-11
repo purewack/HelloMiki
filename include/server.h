@@ -14,9 +14,12 @@
  
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;
-extern char saved_ssid[32];
 
-int connectToWifi(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void), void(*onNoConfig)(void));
+void networkSignalBootConnect();
+void networkSignalForget();
+void networkSignalConnectTo(String ssid, String psk);
+void networkWatchdog(void(*onWait)(void), void(*onOk)(void), void(*onFail)(void));
+
 void requestOnNetworkScan(AsyncWebServerRequest* request);
 void responseOnSaveNetworkCred(AsyncWebServerRequest* request);
 

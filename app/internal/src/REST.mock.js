@@ -1,12 +1,4 @@
 
-export function getStatus(){
-    return new Promise((resolve, rej)=>{
-        setTimeout(()=>{
-            resolve({connected:true})
-        },1000);
-    })
-}
-
 export function getNetworkList(){
     return new Promise((resolve, rej)=>{
         setTimeout(()=>{
@@ -18,17 +10,5 @@ export function getNetworkList(){
                 {ssid:"network_rand_"+Math.random(), strength:-90*Math.random(),channel:1, wps: true},
             ])
         },1000);
-    })
-}
-
-
-export function getLocalPresence(){
-    return new Promise((resolve, rej)=>{
-        setTimeout(()=>{
-            resolve({
-                zone: 'house',
-                direction: 'entered',
-            });
-        },200);
     })
 }

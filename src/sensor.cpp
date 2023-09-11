@@ -42,7 +42,7 @@ void setupMonitor(){
     sensors[1].pin = D6;
 }
 
-void updateMonitor(){
+void monitorWatchdog(){
 
     sensors[0].poll();
     sensors[1].poll();
@@ -72,7 +72,6 @@ if(hasSense){
         );
     );
     ws.printfAll(json.c_str());
-
 }
 
     // auto now = millis();
