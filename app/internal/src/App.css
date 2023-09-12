@@ -1,5 +1,5 @@
 .App {
-  font-size: calc(10px + 2vmin);
+  font-size: calc(10px + 4vmin);
   display: flex;
   flex-direction: column;
   /* justify-content: space-between; */
@@ -8,23 +8,12 @@
   background-color:white;
 
   position: relative;
-
-  --ctheme-dark: rgb(0, 0, 0);
-  --ctheme: rgb(120, 189, 144);
-  --ctheme-light: rgb(147, 218, 189);
-  --ctheme-high: rgb(217, 255, 209);
+  color: var(--ctheme-dark);
 }
 
-/* .App > * {
-  filter: drop-shadow(0 0 10px rgb(211, 196, 179));
 
-} */
-
-.App .NetworkPicker {
-  --theme: var(--ctheme);
-  --theme-light: var(--ctheme-light);
-  --theme-high: var(--ctheme-high);
-  --theme-dark: var(--ctheme-dark);
+.Icon {
+  height: calc(10px + 10vmin);
 }
 
 /* hr {
@@ -36,7 +25,7 @@ ul {
 }
 button {
   border-radius: 0.45rem; 
-  border: none;
+  border: solid var(--ctheme-dark) 4px;
   color:var(--ctheme-dark);
   background-color: var(--ctheme);
   padding: 1rem;
@@ -59,8 +48,8 @@ button:hover {
 
 
 .Title {
-  background-color:rgb(4, 41, 39);
-  color: white;
+  background-color: var(--ctheme-high);
+  color: var(--ctheme-dark);
   padding: 0 2rem;
   display: flex;
   flex-direction: row-reverse;
@@ -73,8 +62,6 @@ button:hover {
   display: inline-block;
   font-size: 6rem;
   max-height: 6rem;
-  align-self: flex-start;
-  transform: translateY(25%);
 }
 
 
@@ -108,30 +95,48 @@ button:hover {
 }
 
 
-.Content {
-  padding: 1rem;
-  border-radius: 1rem;
-}
-.Content .NetworkPicker{
-  padding: 0.25rem;
-}
-
-
-.Events{
-  display: flex;
-  flex-direction: column-reverse;
-  list-style: none;
-}
-
-.Event{
-  background-color: antiquewhite;
+.List{
   margin: 1rem;
   padding: 1rem;
-  border-radius: 0.25rem;
+  border-radius: 1rem;
+  background-color: var(--ctheme-high);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap:1rem;
 }
 
-.Events .Event:last-child {
-  margin: 2rem;
-  font-weight: bold;
-  background-color:bisque;
+
+.FeedHalf .Icon {
+  mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 20%, rgba(255,255,255,0) 60%, rgba(255,255,255,0) 100%);
 }
+.FeedItem,
+.EventItem {
+  display: flex;
+  align-items: center;
+}
+.FeedItem,
+.EventItem > * {
+  padding: 0 1rem;
+}
+.High.Item {
+  border: solid var(--ctheme-dark) 2px;
+}
+
+.RotateFlip{
+  transform: rotate(180deg);
+}
+
+/* .StatusIndicator {
+  background-color: red;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  transition: background-color 1s;
+}
+.StatusIndicator.wait {
+  background-color: yellow;
+}
+.StatusIndicator.open {
+  background-color: green;
+} */

@@ -23,7 +23,7 @@
 }
 
 .NavOption img {
-	max-height: 20vmin;
+	height: 20vmin;
 	pointer-events: none;
 }
 .NavOption h2 {

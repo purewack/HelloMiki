@@ -2,25 +2,21 @@ import './index.css'
 import {cloneElement, Children, useState, useEffect } from 'react';
 import { CSSTransition } from 'react-transition-group';
 
-export function NavBar({children, className = '', onSelection}){
-  const [mini, setMini] = useState(false)
+export function NavBar({children, className = '', onSection}){
   const [path, setPath] = useState(undefined)
-  const navigate = (where, deadEnd)=>{
-    onSelection(where)
-    if(!deadEnd) setPath(where)
-  }
-  const minimize = ()=>{
-
+  const navigate = (where)=>{
+    setPath(where)
+    if(onSection) onSection(where)
   }
 
   return <nav className={'NavBar ' + className}>
     {Children.map(children, c => {
-      return cloneElement(c, {selected: c.props.from === path, navigate});
+      return cloneElement(c, {selected: c.props.section === path, navigate});
     })}
   </nav>
 }
 
-export function NavSet({children, className='', back, selected, navigate}){
+export function NavSet({children, className='', back, selected, navigate, onAction}){
   return <CSSTransition timeout={500} in={selected} unmountOnExit>
     <ul className={'NavSet ' + className}>
       
@@ -40,11 +36,23 @@ export function NavSet({children, className='', back, selected, navigate}){
   </CSSTransition>
 }
 
-export function NavOption({action = undefined, type, title, icon, navigate}){
-  return <li className={'NavOption ' + (action ? 'Action' : '')}>
-    <button id={type} onClick={(ev)=>{
-      if(action && typeof action === 'function') action()
-      navigate(type, action)
+export function NavOption({
+  action = undefined, 
+  toSection = undefined, 
+  autoReturn = undefined,
+  navigate,
+  title, icon, 
+  minor = undefined,
+  className="", 
+}){
+
+  return <li className={'NavOption ' + (!toSection ? 'Action ' : '')  + className}>
+    <button onClick={(ev)=>{
+      if(action){
+        if(typeof action === 'function') action()
+      }
+      if(toSection) navigate(toSection)
+      if(autoReturn) navigate()
     }}>
       <h2>{title}</h2>
       <img className={'Icon SVG ' + icon} alt={icon}/>
