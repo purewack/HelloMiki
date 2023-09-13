@@ -15,6 +15,7 @@
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;
 
+extern long timeOffset;
 
 enum NetState {
     NET_IDLE,
@@ -35,5 +36,7 @@ void requestOnNetworkScan(AsyncWebServerRequest* request);
 void responseOnSaveNetworkCred(AsyncWebServerRequest* request);
 
 void requestOnStatusStorage(AsyncWebServerRequest* request);
-
 void requestOnStatusNetwork(AsyncWebServerRequest* request);
+
+void responseOnUTCTimeOffsetPost(AsyncWebServerRequest* request);
+void requestOnPastEvents(AsyncWebServerRequest* request);

@@ -29,6 +29,8 @@ void setup() {
   });
   server.on("/status/storage",  requestOnStatusStorage);
   server.on("/status/network",  requestOnStatusNetwork);
+  server.on("/events",  requestOnPastEvents);
+  server.on("/timeutc",  responseOnUTCTimeOffsetPost);
   server.begin();
 
   WiFi.mode(WIFI_AP_STA);

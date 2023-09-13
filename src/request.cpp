@@ -14,3 +14,12 @@ void requestOnStatusStorage(AsyncWebServerRequest* request){
     );
     request->send(200, "text/json", json);
 }
+ 
+void responseOnUTCTimeOffsetPost(AsyncWebServerRequest* request){
+    if(request->hasParam("set")){
+        timeOffset = request->getParam("set")->value().toInt();
+        Serial.println(timeOffset);
+        request->send(200);
+    }
+    request->send(400);
+}
