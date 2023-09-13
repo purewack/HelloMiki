@@ -18,6 +18,7 @@ export default function NetworkPicker({className = '', networks, onRefresh}){
             else power = "Low"
 
             return  <NetworkOption 
+              key={`net_${network.ssid}_${network.channel}_${network.strength}`}
               network={{...network, power}} 
               selection={selection} 
               onSelection={ssid=>{setSelection(ssid)}} />
@@ -33,13 +34,10 @@ function NetworkOption({network, selection, onSelection}){
   if(!network)
     return <li className='Network Loading'>...</li>
 
-  const k = `net_${network.ssid}_${network.channel}_${network.strength}`
-  
   const selected = selection === network.ssid
 
   return <CSSTransition in={selected} timeout={700} classNames={'net'}>
   <li className={'Network'} 
-      key={k}
       onClick={()=>{
         onSelection(network.ssid)
       }}

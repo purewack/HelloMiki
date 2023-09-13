@@ -31,6 +31,8 @@ void setup() {
   server.on("/status/network",  requestOnStatusNetwork);
   server.on("/events",  requestOnPastEvents);
   server.on("/timeutc",  responseOnUTCTimeOffsetPost);
+  
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); 
   server.begin();
 
   WiFi.mode(WIFI_AP_STA);

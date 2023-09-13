@@ -1,8 +1,12 @@
 import axios from 'axios'
 
+let address = process.env?.REACT_APP_HW_SERVER_IP
+if(address) address = 'http://' + address
+else address = ''
+
 export function getNetworkList(){
     return new Promise((resolve, rej)=>{
-        axios('/network/scan').then((resp)=>{
+        axios(address+'/network/scan').then((resp)=>{
             resolve(resp.data);
         }).catch(()=>{
             setTimeout(()=>{
@@ -20,7 +24,7 @@ export function getNetworkList(){
 
 export function getNetworkState(){
     return new Promise((resolve, rej)=>{
-        axios('/status/network').then((resp)=>{
+        axios(address+'/status/network').then((resp)=>{
             resolve(resp.data);
         }).catch(()=>{
             setTimeout(()=>{
@@ -34,13 +38,13 @@ export function getNetworkState(){
 
 export function getPastEvents(){
     return  new Promise((resolve, rej)=>{
-            axios('/events?action=get').then((resp)=>{
+            axios(address+'/events?action=get').then((resp)=>{
             resolve(resp.data);
         }).catch(()=>{
             setTimeout(()=>{
                 resolve([
-                    {direction:'leave',  time: new Date().toUTCString()},
-                    {direction:'enter', time: new Date().toUTCString()}
+                    {sensor_id:0, time: Date.now()},
+                    {sensor_id:1, time: Date.now() + 10000}
                 ])
             },1000);
         })

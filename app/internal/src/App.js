@@ -51,48 +51,73 @@ function App() {
   }
  
   const [showEventDetails, setShowEventDetails] = useState(false)
-  const [monitorEvents, setMonitorEvents] = useState([
-    // {time: 1694604503436, direction: 'leave'},
-    // {time: 1694605505436, direction: 'enter'},
-    // {time: 1694606507436, direction: 'waiting'},
-  ])
+  const [monitorEvents, setMonitorEvents] = useState([])
+  const [presence, setPresence] = useState('home');
   const [liveStatus, setLiveStatus] = useState('wait');
-  const [liveEvent, setLiveEvent] = useState('');
+  const timeStampEvent = (ev)=>{
+    return {
+      ...ev,
+      timeHuman: new Date(ev.time).toLocaleString(),
+    }
+  }
 
-  // useEffect(()=>{
-  //   const ws = new WebSocket(`ws://${window.location.hostname}/ws/monitor`);
-  //   ws.onopen = (ev)=>{
-  //     console.log(ev)
-  //     setLiveStatus('open')
-  //   }
-  //   ws.onclose = (ev)=>{
-  //     console.log(ev)
-  //     setLiveStatus('close')
-  //   }
-  //   ws.onerror = (ev)=>{
-  //     console.log(ev)
-  //     setLiveStatus('error')
-  //   }
-  //   ws.onmessage = (ev)=>{
-  //     // catVoiceAlert();
-  //     setLiveEvent(ev.data)
-  //     const sensors = JSON.parse(ev.data)
-  //     sensors.forEach(d => {
-  //       if(d.sensor_id == 0){
-  //         console.log("motion")
-  //         catVoiceAlert('meow')
-  //       }
-  //       if(d.sensor_id == 1){
-  //         console.log("prox")
-  //         catVoiceAlert('meow meow')
-  //       }
-  //     })
-  //   }
+  const liveEvent = useRef();
+  const [liveEventData, setLiveEventData] = useState()
+  useEffect(()=>{
 
-  //   return ()=>{
-  //     if(ws) ws.close();
-  //   }
-  // },[])
+    let openWS;
+    const onWSOpen = (ev)=>{
+      console.log(ev)
+      setLiveStatus('open')
+      liveEvent.current.timer = undefined
+    }
+    const onWSClose = (ev)=>{
+      console.log(ev)
+      setLiveStatus('close')
+    }
+    const onWSError = (ev)=>{
+      console.log(ev)
+      setLiveStatus('error')
+      liveEvent.current.timer = setTimeout(()=>{
+        console.log('connect retry')
+        openWS()
+      },1000)
+    }
+    const onWSMessage = (ev)=>{
+      console.log(ev.data)
+      const event = JSON.parse(ev.data)
+      setLiveEventData(ev.data)
+
+      //voice alert if motion sensor event
+      if(event.type == 0 && event.location == 1){
+        catVoiceAlert('meow')
+      }
+
+      //save to log
+      setMonitorEvents(e => [event, ...e])
+    }
+
+    openWS = ()=>{
+      let address = process.env?.REACT_APP_HW_SERVER_IP
+      if(!address) address = window.location.hostname
+      const ws = new WebSocket(`ws://${address}/ws/monitor`);
+      ws.onmessage = onWSMessage;
+      ws.onerror   = onWSError;
+      ws.onclose   = onWSClose;
+      ws.onopen    = onWSOpen;
+      liveEvent.current = {ws}
+    }
+    const closeWS = ()=>{
+      if(liveEvent.current?.ws) liveEvent.current.ws.close()
+    }
+
+    openWS()
+
+    return ()=>{
+      closeWS()
+      if(liveEvent.current?.timer) clearTimeout(liveEvent.current.timer)
+    }
+  },[])
 
   const networkFetch = ()=>{
     setNetworks([
@@ -120,17 +145,42 @@ function App() {
     })
   },[])
 
-
+  const [showNav, setShowNav] = useState(false)
   return (
     <div className="App">
-      <header className="Title">
+      {!showNav ? <header className="Title" onClick={()=>{setShowNav(true)}}>
         <div>
         <h1>Hello-Miki</h1>
         <h2><i>{currentNetwork}</i></h2>
         </div>
         <span className='Logo'>😻</span>
         {/* <img alt=""  src={icon}/> */}
-      </header>
+      </header> 
+      
+      : 
+      
+      <NavBar >
+        <NavSet >
+          <NavOption icon={'BackArrow'} title={'Back'} action={()=>{setShowNav(false)}} />
+          <NavOption icon={'Wifi'} title='Choose Wifi' action={(ev)=>{
+            networkFetch()
+            setShowNetwork(true);
+          }} />
+          <NavOption icon={'Food'} title='Toggle Feeding' action={()=>{setShowFeeding(f=>!f)}} />
+          <NavOption icon={'BackArrow'} title={'Clear Feeding'} />
+          <NavOption toSection="time" icon={'Time'} title="Other" />
+        </NavSet>
+
+        <NavSet section="time" back>
+          <NavOption icon={'Wifi'} title="Use Online time" autoReturn/>
+          <NavOption icon={'Time'} title="Use device time" autoReturn/>
+          <NavOption icon={'Cog'} title="Set time manually" />
+          <NavOption icon={'Hear'} title="Test Alert" action={()=>{
+            catVoiceAlert('meow')
+          }}/>
+        </NavSet>
+      </NavBar>
+      }
       
       <hr />
       <section className='List Monitor' >
@@ -140,8 +190,8 @@ function App() {
         </div> 
         <ItemList onClick={()=>{setShowEventDetails(d=>!d)}}
         template={(item)=> <div className='EventItemContent'>
-          <p>{item.time}</p>
-          {/* <p>{item.direction}</p> */}
+          <p>{JSON.stringify(item)}</p>
+          {/* <p>{item.time}</p>
           {item.direction !== 'waiting' ? <div>
             <img alt=""  className='Icon SVG Garden'/>
             <img alt=""  className={'Icon SVG BackArrow ' + (item.direction === 'leave' ? 'RotateFlip' : '')}/>
@@ -151,7 +201,7 @@ function App() {
             <img alt=""  className={'Icon SVG House'}/>
             <img alt=""  className='Icon SVG Time'/>
           </div>}
-          {showEventDetails && <p>{item.direction}</p>}
+          {showEventDetails && <p>{item.direction}</p>} */}
         </div>}
         
         items={monitorEvents} show={showEventDetails}/>
@@ -168,15 +218,15 @@ function App() {
             {showFeedingDetails && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
           </div>
         } 
-        preview = {(item)=> 
-          <div className={'FeedItemContentPreview ' + (item.amount < 1 ? 'FeedHalf' : '')}>
-            {showFeedingDetails && <p><i>{item.day}</i></p>}
-            <p>{item.time}</p>
-            {lastFeedTimeDiff && <p>({lastFeedTimeDiff} ago)</p>}
-            <img alt=""  className={'Icon SVG Food'}/>
-            {showFeedingDetails && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
-          </div>
-        }
+        // preview = {(item)=> 
+        //   <div className={'FeedItemContentPreview ' + (item.amount < 1 ? 'FeedHalf' : '')}>
+        //     {showFeedingDetails && <p><i>{item.day}</i></p>}
+        //     <p>{item.time}</p>
+        //     {lastFeedTimeDiff && <p>({lastFeedTimeDiff} ago)</p>}
+        //     <img alt=""  className={'Icon SVG Food'}/>
+        //     {showFeedingDetails && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
+        //   </div>
+        // }
         items={feedingEvents} 
         show={showFeedingDetails}
         />
@@ -190,26 +240,6 @@ function App() {
         
       <hr />
 
-      <NavBar >
-        <NavSet >
-          <NavOption icon={'Wifi'} title='Choose Wifi' action={(ev)=>{
-            networkFetch()
-            setShowNetwork(true);
-          }} />
-          <NavOption icon={'Food'} title='Toggle Feeding' action={()=>{setShowFeeding(f=>!f)}} />
-          <NavOption icon={'BackArrow'} title={'Clear Feeding'} />
-          <NavOption toSection="time" icon={'Time'} title="Set Time" />
-          <NavOption icon={'Hear'} title="Test Alert" action={()=>{
-            catVoiceAlert('meow')
-          }}/>
-        </NavSet>
-
-        <NavSet section="time" back>
-          <NavOption icon={'Wifi'} title="Use Online time" autoReturn/>
-          <NavOption icon={'Time'} title="Use device time" autoReturn/>
-          <NavOption icon={'Cog'} title="Set Manually" />
-        </NavSet>
-      </NavBar>
       
       <PopUp onExit={()=>{setShowNetwork(false)}} trigger={showNetwork}>
         <NetworkPicker networks={networks} onRefresh={()=>{
