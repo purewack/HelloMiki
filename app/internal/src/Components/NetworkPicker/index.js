@@ -1,10 +1,8 @@
 import "./index.css"
-import { useRef, useState } from "react"
+import {useState } from "react"
 import {CSSTransition} from 'react-transition-group'
 
 export default function NetworkPicker({className = '', networks, onRefresh}){
-    const ssidRef = useRef();
-    const passRef = useRef();
     const [selection, setSelection] = useState();
 
     return <div className={'NetworkPicker ' + className} >
@@ -48,7 +46,7 @@ function NetworkOption({network, selection, onSelection}){
   >
     <form className="SubmitNetwork" action='/network/select' method='POST'>
       <h2>{network.ssid}</h2>
-      <img className={'Icon SVG Signal StrengthIcon ' + (network.power)}/>
+      <img alt="" className={'Icon SVG Signal StrengthIcon ' + (network.power)}/>
       <input className="SSID" type='text' name='SSID' defaultValue={network.ssid} hidden/>
       <input className="Password" type='password' name='PSK' placeholder="Enter wifi password"/>
       <input className="BtnConnect" type='submit' name='SUBMIT' value='Connect'/>

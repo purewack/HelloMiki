@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState } from 'react';
-import { getNetworkList, getLocalPresence, getNetworkState, getPastEvents } from './REST';
+import { getNetworkList, getNetworkState, getPastEvents } from './REST';
 
 import './App.css';
 import './Theme.css'
@@ -28,21 +28,33 @@ function App() {
     // {time: '2022-09-12 12:23:00', amount: 0.5},
     // {time: '2022-09-12 19:10:00', amount: 1},
   ])
+  const [lastFeedTimeDiff, setLastFeedTimeDiff] = useState();
+  const timeDiffTimer = useRef();
+  useEffect(()=>{
+    if(feedingEvents[0]?.time){
+      timeDiffTimer.current = setInterval(()=>{
+        const now = new Date();
+        setLastFeedTimeDiff()
+      })
+    }
+
+    return ()=>{
+      clearInterval(timeDiffTimer.current)
+    }
+  },[lastFeedTimeDiff,feedingEvents])
   const feed = (amount)=>{
-    const d = new Date()
     setFeedingEvents(f => [{
-      time: d.toLocaleTimeString(),
-      day: d.toLocaleDateString(),
+      time: Date.now(),
       amount
     },
     ...f])
   }
  
-  const [showEventDetails, setShowDetails] = useState(false)
+  const [showEventDetails, setShowEventDetails] = useState(false)
   const [monitorEvents, setMonitorEvents] = useState([
-    {time: '12:30:00', day:"2023/09/13", direction: 'leave'},
-    {time: '19:00:00', day:"2023/09/13", direction: 'enter'},
-    {time: '19:04:00', day:"2023/09/13", direction: 'waiting'},
+    // {time: 1694604503436, direction: 'leave'},
+    // {time: 1694605505436, direction: 'enter'},
+    // {time: 1694606507436, direction: 'waiting'},
   ])
   const [liveStatus, setLiveStatus] = useState('wait');
   const [liveEvent, setLiveEvent] = useState('');
@@ -96,22 +108,18 @@ function App() {
 
   useEffect(()=>{
     networkFetch();
+
     getNetworkState().then(net => {
       setCurrentNetwork(net.ssid);
     }).catch(()=>{
       setCurrentNetwork('No Network')
     })
+
+    getPastEvents().then(ev => {
+      setMonitorEvents(ev);
+    })
   },[])
 
-  // useEffect(()=>{
-  //   if(mode === 'logs'){
-  //     getPastEvents().then(ev => {
-  //       setMonitorEvents(ev);
-  //     }).catch(()=>{
-  //       setMonitorEvents([])
-  //     })
-  //   }
-  // },[mode])
 
   return (
     <div className="App">
@@ -121,43 +129,57 @@ function App() {
         <h2><i>{currentNetwork}</i></h2>
         </div>
         <span className='Logo'>😻</span>
-        {/* <img src={icon}/> */}
+        {/* <img alt=""  src={icon}/> */}
       </header>
       
       <hr />
       <section className='List Monitor' >
-        <div className='Status'>
-          <img className='Icon SVG Hear'/>
-          <div className={'StatusIndicator ' + liveStatus}></div>
+        <div className={'Status' }>
+          <img alt=""  className='Icon SVG House'/>
+          <img alt=""  className='Icon SVG Garden'/>
         </div> 
-        {/* <p>{liveStatus} Event:{liveEvent}</p> */}
-        <ItemList onClick={()=>{setShowDetails(d=>!d)}}
-        template={(item)=> <div className='EventItem'>
+        <ItemList onClick={()=>{setShowEventDetails(d=>!d)}}
+        template={(item)=> <div className='EventItemContent'>
           <p>{item.time}</p>
-          <p>{item.direction}</p>
-          {item.direction !== 'waiting' ? <>
-            <img className='Icon SVG Garden'/>
-            <img className={'Icon SVG BackArrow ' + (item.direction === 'leave' ? 'RotateFlip' : '')}/>
-            <img className='Icon SVG Road'/>
-          </> 
-          : <>
-            <img className={'Icon SVG House'}/>
-            <img className='Icon SVG Time'/>
-          </>
-          }
-        </div>} items={monitorEvents} show={showEventDetails}/>
+          {/* <p>{item.direction}</p> */}
+          {item.direction !== 'waiting' ? <div>
+            <img alt=""  className='Icon SVG Garden'/>
+            <img alt=""  className={'Icon SVG BackArrow ' + (item.direction === 'leave' ? 'RotateFlip' : '')}/>
+            <img alt=""  className='Icon SVG Road'/>
+          </div> 
+          : <div>
+            <img alt=""  className={'Icon SVG House'}/>
+            <img alt=""  className='Icon SVG Time'/>
+          </div>}
+          {showEventDetails && <p>{item.direction}</p>}
+        </div>}
+        
+        items={monitorEvents} show={showEventDetails}/>
       </section>
       
       {showFeeding && <section className='List Food' >
         {/* <h1>Food</h1> */}
         <ItemList onClick={()=>{setShowFeedingDetails(d=>!d)}}
-        template={(item)=>{
-          return <div className={'FeedItem ' + (item.amount < 1 ? 'FeedHalf' : '')}>
+        template={(item)=>
+          <div className={'FeedItemContent ' + (item.amount < 1 ? 'FeedHalf' : '')}>
+            {showFeedingDetails && <p><i>{item.day}</i></p>}
             <p>{item.time}</p>
-            <p><i>{item.day}</i></p>
-            <img className={'Icon SVG Food'}/>
+            <img alt=""  className={'Icon SVG Food'}/>
+            {showFeedingDetails && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
           </div>
-        }} items={feedingEvents} show={showFeedingDetails}/>
+        } 
+        preview = {(item)=> 
+          <div className={'FeedItemContentPreview ' + (item.amount < 1 ? 'FeedHalf' : '')}>
+            {showFeedingDetails && <p><i>{item.day}</i></p>}
+            <p>{item.time}</p>
+            {lastFeedTimeDiff && <p>({lastFeedTimeDiff} ago)</p>}
+            <img alt=""  className={'Icon SVG Food'}/>
+            {showFeedingDetails && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
+          </div>
+        }
+        items={feedingEvents} 
+        show={showFeedingDetails}
+        />
         <NavBar>
           <NavSet>
             <NavOption icon={'Food'} title={'1'}   action={()=>{feed(1)}}/>

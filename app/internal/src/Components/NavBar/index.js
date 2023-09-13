@@ -1,5 +1,5 @@
 import './index.css'
-import {cloneElement, Children, useState, useEffect } from 'react';
+import {cloneElement, Children, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
 
 export function NavBar({children, className = '', onSection}){

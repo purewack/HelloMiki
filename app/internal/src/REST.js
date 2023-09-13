@@ -34,13 +34,13 @@ export function getNetworkState(){
 
 export function getPastEvents(){
     return  new Promise((resolve, rej)=>{
-            axios('/log/events').then((resp)=>{
+            axios('/events?action=get').then((resp)=>{
             resolve(resp.data);
         }).catch(()=>{
             setTimeout(()=>{
                 resolve([
-                    {direction:'leaving',  time: new Date().toUTCString()},
-                    {direction:'entering', time: new Date().toUTCString()}
+                    {direction:'leave',  time: new Date().toUTCString()},
+                    {direction:'enter', time: new Date().toUTCString()}
                 ])
             },1000);
         })
