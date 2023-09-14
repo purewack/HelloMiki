@@ -4,7 +4,8 @@
 #include "libdarray.h"
 
 bool isArmed = true;
-unsigned long timeOffset = 0;
+double timeOffset = 0;
+double timeWhenSet = 0;
 
 enum Location{
     HOME = 0,
@@ -15,7 +16,7 @@ Location currentLocation = HOME;
 Location lastLocation = HOME;
 
 struct Event{
-    unsigned long time;
+    double time;
     Location now;
     Location last;
 };
@@ -40,11 +41,11 @@ struct SensorEvent{
         state = !digitalRead(pin);
         if(state && !stateOld) {
             eventUnspent = true;
-            whenRising = millis();
+            // whenRising = millis();
             timeout = 500;
         }
         if(!state && stateOld) {
-            whenFalling = millis();
+            // whenFalling = millis();
         }
 
         stateOld = state;
@@ -71,7 +72,7 @@ void setupMonitor(){
 
 void liveSave(Location currentLocation, Location lastLocation){
     sarray_insert(pastEvents, {
-        timeOffset + millis(),
+        timeOffset + double(millis()) - timeWhenSet,
         currentLocation,
         lastLocation
     },0);
@@ -80,7 +81,7 @@ void liveSave(Location currentLocation, Location lastLocation){
 void livePost(String &json, Location currentLocation, Location lastLocation){
     if(ws.availableForWriteAll()){
         JSON_OBJECT(json,
-            JSON_KV(json,"time",timeOffset + millis());
+            JSON_KV(json,"time",timeOffset + double(millis()) - timeWhenSet);
                 JSON_NEXT(json);
             JSON_KV(json,"now", currentLocation);
                 JSON_NEXT(json);
@@ -113,7 +114,7 @@ void monitorWatchdog(void(*onSense)(int locNow, int locPrev)){
             livePost(json,currentLocation,lastLocation);
             onSense(currentLocation, lastLocation);
         }
-        else if(lastLocation == ROAD){
+        else if(currentLocation == ROAD){
             lastLocation = currentLocation;
             currentLocation = GARDEN;
             liveSave(currentLocation,lastLocation);

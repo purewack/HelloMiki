@@ -17,7 +17,8 @@ void requestOnStatusStorage(AsyncWebServerRequest* request){
  
 void responseOnUTCTimeOffsetPost(AsyncWebServerRequest* request){
     if(request->hasParam("set")){
-        timeOffset = request->getParam("set")->value().toInt();
+        timeOffset = request->getParam("set")->value().toDouble();
+        timeWhenSet = double(millis());
         Serial.println(timeOffset);
         request->send(200);
     }

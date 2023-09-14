@@ -11,19 +11,36 @@
   color: var(--ctheme-dark);
 }
 
+.App.Intro {
+  background-color: var(--ctheme-high);
+  display: grid;
+  place-items: center;
+}
+.App.Intro .Logo{
+  font-size: 6rem;
+  padding: 0;
+  margin: 0;
+}
 
 .Icon {
   height: calc(10px + 10vmin);
 }
+.RotateFlip{
+  transform: rotate(180deg);
+}
 
-/* hr {
+hr {
   width: 90%;
-} */
+}
 ul {
   padding: 0;
   list-style: none;
 }
 button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border-radius: 0.45rem; 
   border: solid var(--ctheme-dark) 4px;
   color:var(--ctheme-dark);
@@ -94,48 +111,59 @@ button:hover {
 	transform: translateZ(-100px);
 }
 
+.LiveStatus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+
+.ItemList{
+  width: 100%;
+}
 .List{
   margin: 1rem;
-  padding: 1rem;
-  border-radius: 1rem;
-  background-color: var(--ctheme-high);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap:1rem;
 }
+.List .ItemList {
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: var(--ctheme-high);
+}
+.High.Item {
+  border: solid var(--ctheme-dark) 2px;
+}
 
-.ItemList{
-  width: 100%;
+.FeedHalf .Icon {
+  mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 20%, rgba(255,255,255,0) 60%, rgba(255,255,255,0) 100%);
 }
-.List .Item {
-  justify-content:center;
+
+.Disarm .Icon{
+  opacity: 0.2;
 }
+
 
 
 .FeedItemContent,
 .EventItemContent {
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-evenly;
   flex-grow: 1;
 }
-.High.Item {
-  border: solid var(--ctheme-dark) 2px;
+.FeedItemContent p,
+.EventItemContent p {
+  width: min-content;
 }
 
-.RotateFlip{
-  transform: rotate(180deg);
-}
-
-.Status .Icon {
-  opacity: 0.2;
-}
-
-.Status .Icon {
-  opacity: 0.2;
-}
-.FeedHalf .Icon {
-  mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 20%, rgba(255,255,255,0) 60%, rgba(255,255,255,0) 100%);
+.EventBanner {
+  background-color: var(--ctheme-high);
+  border-radius: 1rem;
+  width: max-content;
+  padding: 0.25rem 1rem;
+  display: flex;
+  align-items: center;
 }

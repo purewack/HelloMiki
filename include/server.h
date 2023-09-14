@@ -15,7 +15,8 @@
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;
 
-extern unsigned long timeOffset;
+extern double timeOffset;
+extern double timeWhenSet;
 
 enum NetState {
     NET_IDLE,

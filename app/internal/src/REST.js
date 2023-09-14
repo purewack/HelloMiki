@@ -50,3 +50,27 @@ export function getPastEvents(){
         })
     })
 }
+
+export function getSensorArmState(){
+    return  new Promise((resolve, rej)=>{
+            axios(address+'/events?isArmed').then((resp)=>{
+            resolve(resp.data);
+        }).catch(()=>{
+            setTimeout(()=>{
+                resolve(true)
+            },1000);
+        })
+    })
+}
+
+export function setSensorArmState(state){
+    axios(address+'/events?arm='+(state ? '1' : '0'));
+}
+
+export function setTime(timestampUTC){
+    axios(address+'/timeutc?set='+timestampUTC);
+}
+
+export function fetchTime(timestampUTC){
+    axios(address+'/timeutc?fetch');
+}

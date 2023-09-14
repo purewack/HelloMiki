@@ -17,7 +17,7 @@ export function NavBar({children, className = '', onSection}){
 }
 
 export function NavSet({children, className='', back, selected, navigate, onAction}){
-  return <CSSTransition timeout={500} in={selected} unmountOnExit>
+  return <CSSTransition timeout={0} in={selected} unmountOnExit>
     <ul className={'NavSet ' + className}>
       
       {back && <li className={'NavOption Back'}>
