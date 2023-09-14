@@ -4,25 +4,20 @@
 #include "libdarray.h"
 
 bool isArmed = true;
-long timeOffset = 0;
+unsigned long timeOffset = 0;
 
 enum Location{
     HOME = 0,
     GARDEN = 1,
     ROAD = 2
 };
-Location currentLocation = GARDEN;
+Location currentLocation = HOME;
+Location lastLocation = HOME;
 
-enum EventType{
-    LEAVE = -1,
-    WAIT = 0,
-    ENTER = 1
-};
 struct Event{
-    char sensor;
-    long time;
-    Location location;
-    EventType type;
+    unsigned long time;
+    Location now;
+    Location last;
 };
 
 Event pastEventsBuf[64];
@@ -65,6 +60,7 @@ void setupMonitor(){
 
     pinMode(D5,INPUT_PULLUP);
     pinMode(D6,INPUT_PULLUP);
+    pinMode(D7,INPUT_PULLUP);
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN,1);
 
@@ -73,143 +69,119 @@ void setupMonitor(){
     sensors[2].pin = D7;
 }
 
-void monitorWatchdog(void(*onSense)(void)){
+void liveSave(Location currentLocation, Location lastLocation){
+    sarray_insert(pastEvents, {
+        timeOffset + millis(),
+        currentLocation,
+        lastLocation
+    },0);
+}
 
-    sensors[0].poll();
+void livePost(String &json, Location currentLocation, Location lastLocation){
+    if(ws.availableForWriteAll()){
+        JSON_OBJECT(json,
+            JSON_KV(json,"time",timeOffset + millis());
+                JSON_NEXT(json);
+            JSON_KV(json,"now", currentLocation);
+                JSON_NEXT(json);
+            JSON_KV(json,"prev", lastLocation);
+        );
+        ws.printfAll(json.c_str());
+    }
+}
+
+//see eventLogic.drawio.png
+void monitorWatchdog(void(*onSense)(int locNow, int locPrev)){
+
+    // sensors[0].poll();
     sensors[1].poll();
     sensors[2].poll();
 
     bool eventUnspent = sensors[0].eventUnspent || sensors[1].eventUnspent || sensors[2].eventUnspent;
     digitalWrite(LED_BUILTIN,!eventUnspent);
 
-    if(eventUnspent){
+    if(eventUnspent && isArmed){
     String json;
 
-    //see eventLogic.drawio.png
-
-    //sensor Prox
+    //sensor RFID
     if(sensors[2].eventUnspent){
         sensors[2].eventUnspent = false;
-        if(currentLocation == HOME){
-            currentLocation = GARDEN;
-            sarray_push(pastEvents, {
-                2,
-                timeOffset + sensors[2].whenRising,
-                currentLocation,
-                LEAVE
-            });
-            Serial.println("leave");
-            if(ws.availableForWriteAll()){
-                JSON_OBJECT(json,
-                    JSON_KV(json,"sensor_id",2);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"time",timeOffset + sensors[2].whenRising);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"location", currentLocation);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"type", LEAVE);
-                );
-                ws.printfAll(json.c_str());
-            }
-        }
-        else{
-            currentLocation = HOME;
-            sarray_push(pastEvents, {
-                2,
-                timeOffset + sensors[2].whenRising,
-                currentLocation,
-                ENTER
-            });
-            Serial.println("enter");
-            if(ws.availableForWriteAll()){
-                JSON_OBJECT(json,
-                    JSON_KV(json,"sensor_id",2);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"time",timeOffset + sensors[2].whenRising);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"location", currentLocation);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"type", ENTER);
-                );
-                ws.printfAll(json.c_str());
-            }
-        }
-    }
-
-    //sensor RFID
-    if(sensors[1].eventUnspent){
-        sensors[1].eventUnspent = false;
         if(currentLocation == GARDEN){
+            lastLocation = currentLocation;
             currentLocation = ROAD;
-            sarray_push(pastEvents, {
-                1,
-                timeOffset + sensors[1].whenRising,
-                currentLocation,
-                LEAVE
-            });
-            Serial.println("leave");
-            if(ws.availableForWriteAll()){
-                JSON_OBJECT(json,
-                    JSON_KV(json,"sensor_id",1);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"time",timeOffset + sensors[1].whenRising);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"location", currentLocation);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"type", LEAVE);
-                );
-                ws.printfAll(json.c_str());
-            }
+            liveSave(currentLocation,lastLocation);
+            livePost(json,currentLocation,lastLocation);
+            onSense(currentLocation, lastLocation);
         }
-        else{
+        else if(lastLocation == ROAD){
+            lastLocation = currentLocation;
             currentLocation = GARDEN;
-            sarray_push(pastEvents, {
-                1,
-                timeOffset + sensors[1].whenRising,
-                currentLocation,
-                ENTER
-            });
-            Serial.println("enter");
-            if(ws.availableForWriteAll()){
-                JSON_OBJECT(json,
-                    JSON_KV(json,"sensor_id",1);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"time",timeOffset + sensors[1].whenRising);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"location", currentLocation);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"type", ENTER);
-                );
-                ws.printfAll(json.c_str());
-            }
+            liveSave(currentLocation,lastLocation);
+            livePost(json,currentLocation,lastLocation);
+            onSense(currentLocation, lastLocation);
         }
     }
 
     //sensor motion
-    if(sensors[0].eventUnspent){
-        sensors[0].eventUnspent = false;
-        if(currentLocation == GARDEN){ 
-            sarray_push(pastEvents, {
-                0,
-                timeOffset + sensors[0].whenRising,
-                currentLocation,
-                WAIT
-            });
-            Serial.println("wait");
-            if(ws.availableForWriteAll()){
-                JSON_OBJECT(json,
-                    JSON_KV(json,"sensor_id",0);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"time",timeOffset + sensors[0].whenRising);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"location", currentLocation);
-                        JSON_NEXT(json);
-                    JSON_KV(json,"type", WAIT);
-                );
-                ws.printfAll(json.c_str());
-            }
-        }
+    if(sensors[1].eventUnspent){
+        sensors[1].eventUnspent = false;
+        // if(lastLocation == ROAD){ 
+            lastLocation = currentLocation;
+            currentLocation = GARDEN;
+            liveSave(currentLocation,lastLocation);
+            livePost(json,currentLocation,lastLocation);
+            onSense(currentLocation, lastLocation);
+        // }
     }
+
+        //sensor Prox
+    // if(sensors[0].eventUnspent){
+    //     sensors[0].eventUnspent = false;
+
+    //     if(currentLocation == HOME && lastLocation == GARDEN){
+    //         currentLocation = GARDEN;
+    //         lastLocation = HOME;
+    //         sarray_push(pastEvents, {
+    //             timeOffset + now,
+    //             currentLocation,
+    //             lastLocation,
+    //         });
+    //         if(ws.availableForWriteAll()){
+    //             JSON_OBJECT(json,
+    //                 JSON_KV(json,"time",timeOffset + now);
+    //                     JSON_NEXT(json);
+    //                 JSON_KV(json,"now", currentLocation);
+    //                     JSON_NEXT(json);
+    //                 JSON_KV(json,"prev", lastLocation);
+    //                     JSON_NEXT(json);
+    //             );
+    //             ws.printfAll(json.c_str());
+    //         }
+    //         onSense(currentLocation, lastLocation);
+    //     }
+    //     else if(currentLocation == GARDEN && lastLocation == HOME){
+    //         currentLocation = HOME;
+    //         lastLocation = GARDEN;
+    //         sarray_push(pastEvents, {
+    //             timeOffset + now,
+    //             currentLocation,
+    //             lastLocation
+    //         });
+    //         if(ws.availableForWriteAll()){
+    //             JSON_OBJECT(json,
+    //                 JSON_KV(json,"time",timeOffset + now);
+    //                     JSON_NEXT(json);
+    //                 JSON_KV(json,"now", currentLocation);
+    //                     JSON_NEXT(json);
+    //                 JSON_KV(json,"prev", lastLocation);
+    //                     JSON_NEXT(json);
+    //             );
+    //             ws.printfAll(json.c_str());
+    //         }
+    //         onSense(currentLocation, lastLocation);
+    //     }
+    // }
+
     }
     
 }
@@ -219,17 +191,16 @@ void requestOnPastEvents(AsyncWebServerRequest* request){
         auto p = request->getParam("action")->value();
         if(p == "get"){
             String json;
+            int ii = pastEvents.count > 10 ? 10 : pastEvents.count;
             JSON_ARRAY(json,
-                for(unsigned int i=0; i<pastEvents.count; i++){
+                for(unsigned int i=0; i<ii; i++){
                     if(i) JSON_NEXT(json);
                     JSON_OBJECT(json,
                         JSON_KV(json, "time",pastEventsBuf[i].time);
                             JSON_NEXT(json);
-                        JSON_KV(json, "sensor_id", int(pastEventsBuf[i].sensor));
+                        JSON_KV(json, "now",int(pastEventsBuf[i].now));
                             JSON_NEXT(json);
-                        JSON_KV(json, "type", int(pastEventsBuf[i].type));
-                            JSON_NEXT(json);
-                        JSON_KV(json, "location",int(pastEventsBuf[i].location));
+                        JSON_KV(json, "prev",int(pastEventsBuf[i].last));
                     );
                 }
             );
@@ -240,12 +211,19 @@ void requestOnPastEvents(AsyncWebServerRequest* request){
             request->send(200);
         }
         else if(p == "count"){
-            request->send(200, "text/plain", String(pastEvents.count));
+            request->send(200, "text/json", String(pastEvents.count));
         }
     }
-    else if(request->hasParam("location")){
+    if(request->hasParam("location")){
         currentLocation = Location(request->getParam("location")->value().toInt());
         request->send(200);
+    }
+    if(request->hasParam("arm")){
+        isArmed = request->getParam("arm")->value().toInt();
+        request->send(200);
+    }
+    if(request->hasParam("isArmed")){
+        request->send(200, "text/json", JBOOL(isArmed));
     }
     request->send(400);
 }

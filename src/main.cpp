@@ -40,13 +40,25 @@ void setup() {
   networkSignalBootConnect();
 }
 
+String locString(int a){
+  if(a == 1) return " R  [G]  H ";
+  if(a == 2) return "[R]  G   H ";
+  return            " R   G  [H] ";
+};
 
 NetState wifiState = NET_IDLE;
 void loop() {
   ws.cleanupClients();
   MDNS.update();
 
-  monitorWatchdog();
+  monitorWatchdog([](int now, int prev){
+
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.println(locString(now));
+    display.println(locString(prev));
+    display.display();
+  });
   networkWatchdog([](NetState state){
     wifiState = state;
   });
@@ -78,6 +90,7 @@ void loop() {
         display.println(WiFi.softAPIP().toString());
         break;
     }
+
     display.display();
   }
 }
