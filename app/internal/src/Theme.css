@@ -1,0 +1,13 @@
+.App {
+  --ctheme-dark: rgb(76, 0, 67);
+  --ctheme: rgb(120, 189, 144);
+  --ctheme-light: rgb(147, 218, 189);
+  --ctheme-high: rgb(217, 255, 209);
+}
+
+.App .NetworkPicker {
+  --theme: var(--ctheme);
+  --theme-light: var(--ctheme-light);
+  --theme-high: var(--ctheme-high);
+  --theme-dark: var(--ctheme-dark);
+}

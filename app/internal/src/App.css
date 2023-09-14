@@ -1,0 +1,169 @@
+.App {
+  font-size: calc(10px + 4vmin);
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color:white;
+
+  position: relative;
+  color: var(--ctheme-dark);
+}
+
+.App.Intro {
+  background-color: var(--ctheme-high);
+  display: grid;
+  place-items: center;
+}
+.App.Intro .Logo{
+  font-size: 6rem;
+  padding: 0;
+  margin: 0;
+}
+
+.Icon {
+  height: calc(10px + 10vmin);
+}
+.RotateFlip{
+  transform: rotate(180deg);
+}
+
+hr {
+  width: 90%;
+}
+ul {
+  padding: 0;
+  list-style: none;
+}
+button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.45rem; 
+  border: solid var(--ctheme-dark) 4px;
+  color:var(--ctheme-dark);
+  background-color: var(--ctheme);
+  padding: 1rem;
+  padding-block: 0.25rem;
+  margin: 0.25rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+button:hover {
+  background-color: var(--ctheme-high);
+  color: var(--ctheme-dark);
+}
+
+.Card {
+  /* background-color: var(--ctheme-light); */
+  border-radius: 0.45rem; 
+  padding: 0.35rem;
+}
+
+
+.Title {
+  background-color: var(--ctheme-high);
+  color: var(--ctheme-dark);
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+  gap:1rem;
+  line-height: 0.75;
+}
+.Title .Logo{
+  display: inline-block;
+  font-size: 6rem;
+  max-height: 6rem;
+}
+
+
+.NavBar {
+  position: relative;
+  perspective: 400px;
+}
+
+.NavBar {
+  --speed: 500ms;
+}
+.NavSet.enter {
+  opacity: 0;
+	transform: translateZ(-100px);
+}
+.NavSet.enter-active {
+	position:absolute;
+  inset: 0;
+  transition: opacity var(--speed), transform var(--speed);
+  opacity: 1;
+	transform: translateZ(0);
+}
+.NavSet.exit {
+  opacity: 1;
+	transform: translateZ(0);
+}
+.NavSet.exit-active {
+  transition: opacity var(--speed), transform var(--speed);
+  opacity: 0;
+	transform: translateZ(-100px);
+}
+
+.LiveStatus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.ItemList{
+  width: 100%;
+}
+.List{
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap:1rem;
+}
+.List .ItemList {
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: var(--ctheme-high);
+}
+.High.Item {
+  border: solid var(--ctheme-dark) 2px;
+}
+
+.FeedHalf .Icon {
+  mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 20%, rgba(255,255,255,0) 60%, rgba(255,255,255,0) 100%);
+}
+
+.Disarm .Icon{
+  opacity: 0.2;
+}
+
+
+
+.FeedItemContent,
+.EventItemContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-grow: 1;
+}
+.FeedItemContent p,
+.EventItemContent p {
+  width: min-content;
+}
+
+.EventBanner {
+  background-color: var(--ctheme-high);
+  border-radius: 1rem;
+  width: max-content;
+  padding: 0.25rem 1rem;
+  display: flex;
+  align-items: center;
+}

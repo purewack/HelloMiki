@@ -1,0 +1,35 @@
+.NavBar {
+	/* overflow: hidden; */
+}
+.NavSet{
+	margin: 0;
+	display: flex;
+	align-items: center; 
+	justify-content: center;
+	flex-wrap: wrap;
+	/* overflow-y: scroll; */
+}
+.NavOption {
+	margin: 1rem;
+}
+.NavOption button {
+	width: 100%;
+	height: 100%;
+	padding: 1rem;
+	flex-direction: column-reverse;
+}
+
+.NavOption img {
+	height: 20vmin;
+	pointer-events: none;
+}
+.NavOption h2 {
+	margin: 0;
+	font-weight: 400;
+	font-size: 1.5rem;
+	pointer-events: none;
+}
+
+.NavOption.Action button {
+	background-color: var(--ctheme-light);
+}
