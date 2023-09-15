@@ -52,13 +52,14 @@ void loop() {
   MDNS.update();
 
   monitorWatchdog([](int now, int prev){
-
-    display.clearDisplay();
-    display.setCursor(0,0);
-    display.println(locString(now));
-    display.println(locString(prev));
-    display.display();
   });
+
+  //   display.clearDisplay();
+  //   display.setCursor(0,0);
+  //   display.println(locString(now));
+  //   display.println(locString(prev));
+  //   display.display();
+  // });
   networkWatchdog([](NetState state){
     wifiState = state;
   });
