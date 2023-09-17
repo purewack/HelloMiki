@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Update Panel</h1>
+
+    <form method="post" enctype="multipart/form-data" action="/device/reset">
+        <input type="submit" name="ota"  value="Reset"/>
+    </form>
+
+    <form method="post" enctype="multipart/form-data" action="/device/upload?type=ota">
+        <label for="ota">OTA Firmware</label>
+        <input type="file" name="ota"  value="Upload" accept=".bin, application/x-binary"/>
+        <input type="submit" name="ota"  value="Upload"/>
+    </form>
+
+    <form method="post" enctype="multipart/form-data" action="/device/upload?type=public">
+        <label for="public_webapp">WebApp folder (public)</label>
+        <input type="file" name="public_webapp" webkitdirectory mozdirectory value="Upload"/>
+        <input type="submit" name="public_webapp"  value="Upload"/>
+    </form>
+
+    <script defer> 
+    </script>
+</body>
+</html>

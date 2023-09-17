@@ -23,6 +23,7 @@ void setup() {
   
   server.addHandler(&ws);
   server.serveStatic("/", LittleFS, "/public").setDefaultFile("index.html");
+
   server.on("/network/scan", requestOnNetworkScan); 
   server.on("/network/select", [=](AsyncWebServerRequest* request){
     responseOnSaveNetworkCred(request);
@@ -32,6 +33,8 @@ void setup() {
   server.on("/events",  requestOnPastEvents);
   server.on("/timeutc",  responseOnUTCTimeOffsetPost);
   
+  setupUpdateServer();
+
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); 
   server.begin();
 

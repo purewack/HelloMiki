@@ -41,3 +41,5 @@ void requestOnStatusNetwork(AsyncWebServerRequest* request);
 
 void responseOnUTCTimeOffsetPost(AsyncWebServerRequest* request);
 void requestOnPastEvents(AsyncWebServerRequest* request);
+
+void setupUpdateServer();

@@ -20,7 +20,7 @@ void responseOnUTCTimeOffsetPost(AsyncWebServerRequest* request){
         timeOffset = request->getParam("set")->value().toDouble();
         timeWhenSet = double(millis());
         Serial.println(timeOffset);
-        request->send(200);
+        request->send(204);
     }
     request->send(400);
 }
