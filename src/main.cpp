@@ -8,7 +8,10 @@ AsyncWebSocket ws("/ws/monitor");
 void setup() {
   setupMonitor();
 
-  Serial.begin(19200);
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Hello Miki!");
+
   display.begin(0x3C, true); // Address 0x3C default
   display.clearDisplay();
   display.setTextSize(1);
@@ -41,6 +44,7 @@ void setup() {
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP("HelloMiki_AP");
   networkSignalBootConnect();
+
 }
 
 String locString(int a){
