@@ -107,12 +107,12 @@ function App() {
     const onWSClose = (ev)=>{
       console.log(ev)
       setLiveStatus('close')
-      // if(!ev.wasClean){
-      //   liveEvent.current.timer = setTimeout(()=>{
-      //     console.log('connect retry')
-      //     openWS()
-      //   },1000)
-      // }
+      if(!ev.wasClean){
+        liveEvent.current.timer = setTimeout(()=>{
+          console.log('connect retry')
+          openWS()
+        },1000)
+      }
     }
     const onWSError = (ev)=>{
       console.log(ev)
@@ -194,19 +194,20 @@ function App() {
         setTime(Date.now());
       }}>
         <p className='Logo'>😻</p>
-        <p>Hello Miki!</p>
+        <h1>Hello Miki!</h1>
       </header>
+      <h2 className='Version'>v1.1</h2>
     </div>
   }
 
   return (
     <div className="App" ref={appRef}>
       <header className="Title" onClick={()=>{setShowNav(n=>!n)}}>
-        <div>
+        <div className='Text'>
         <h1>Hello-Miki</h1>
-        <h2><i>{currentNetwork}</i></h2>
+        <h3><i>{currentNetwork}</i></h3>
         </div>
-        <span className='Logo'>😻</span>
+        <span className={'Logo Main ' + liveStatus}>😻</span>
         {/* <img alt=""  src={icon}/> */}
       </header> 
       

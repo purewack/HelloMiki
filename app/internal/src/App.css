@@ -1,3 +1,9 @@
+.App .Version{
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}
+
 .App {
   font-size: calc(10px + 4vmin);
   display: flex;
@@ -18,6 +24,8 @@
 }
 .App.Intro header {
   color: white;
+  display: flex;
+  
   background-color: var(--ctheme);
   padding: 3rem;
   filter: drop-shadow(0 0 10px gray);
@@ -38,6 +46,14 @@
 }
 .RotateFlip{
   transform: rotate(180deg);
+}
+
+.App .Logo.Main {
+  opacity: 0.2;
+}
+
+.App .Logo.Main.open {
+  opacity: 1;
 }
 
 hr {
@@ -79,17 +95,20 @@ button:hover {
   background-color: var(--ctheme-high);
   color: var(--ctheme-dark);
   padding: 0 2rem;
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: space-between;
+  display: grid;
+  grid-template-areas: "logo text";
+  grid-template-columns: 1fr 3fr;
   align-items: center;
   gap:1rem;
   line-height: 0.75;
 }
 .Title .Logo{
+  grid-area: logo;
   display: inline-block;
-  font-size: 6rem;
-  max-height: 6rem;
+  font-size: min(20vw,10rem);
+}
+.Title .Text {
+  text-align: end;
 }
 
 
@@ -184,7 +203,7 @@ button:hover {
   margin: 0;
 }
 .EventTimeBanner .EventTime{
-  font-size: 3rem;
+  font-size: 4rem;
 }
 
 .EventTimeBanner .EventDay,
