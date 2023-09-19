@@ -31,6 +31,7 @@ struct SensorEvent{
     long whenRising = 0;
     long whenFalling = 0;
     int pin;
+    bool invert = false;
     long timeout;
     void poll(){
         if(timeout) {
@@ -38,7 +39,12 @@ struct SensorEvent{
             delay(1);
             return;
         }
-        state = !digitalRead(pin);
+
+        if(invert)
+            state = !digitalRead(pin);
+        else
+            state = digitalRead(pin);
+            
         if(state && !stateOld) {
             eventUnspent = true;
             // whenRising = millis();

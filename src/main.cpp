@@ -8,7 +8,10 @@ AsyncWebSocket ws("/ws/monitor");
 void setup() {
   setupMonitor();
 
-  Serial.begin(19200);
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Hello Miki!");
+
   display.begin(0x3C, true); // Address 0x3C default
   display.clearDisplay();
   display.setTextSize(1);
@@ -32,6 +35,8 @@ void setup() {
   server.on("/events",  requestOnPastEvents);
   server.on("/timeutc",  responseOnUTCTimeOffsetPost);
   
+  setupUpdateServer();
+
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); 
   server.begin();
 
@@ -52,13 +57,14 @@ void loop() {
   MDNS.update();
 
   monitorWatchdog([](int now, int prev){
-
-    display.clearDisplay();
-    display.setCursor(0,0);
-    display.println(locString(now));
-    display.println(locString(prev));
-    display.display();
   });
+
+  //   display.clearDisplay();
+  //   display.setCursor(0,0);
+  //   display.println(locString(now));
+  //   display.println(locString(prev));
+  //   display.display();
+  // });
   networkWatchdog([](NetState state){
     wifiState = state;
   });

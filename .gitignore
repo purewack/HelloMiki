@@ -1,5 +1,6 @@
 build
-data
+data/private
+data/public
 .build
 .pio
 .vscode/.browse.c_cpp.db*
