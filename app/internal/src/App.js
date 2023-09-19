@@ -28,7 +28,8 @@ function App() {
   const timeStampEvent = (ev)=>{
     return {
       ...ev,
-      timeHuman: new Date(ev.time).toLocaleString(),
+      timeHuman: new Date(ev.time).toLocaleTimeString(),
+      dateHuman: new Date(ev.time).toLocaleDateString(),
     }
   }
 
@@ -38,20 +39,27 @@ function App() {
   const timeDiffTimer = useRef();
   useEffect(()=>{
     if(feedingEvents[0]?.time){
-      timeDiffTimer.current = setInterval(()=>{
+      const newTime = ()=>{
         const now = new Date();
-        setLastFeedTimeDiff()
-      })
+        const dt = new Date(now - feedingEvents[0].time);
+        const diff = dt.getHours()-1 + 'h ' + dt.getMinutes() + 'min'
+        console.log(diff, dt, now)
+        setLastFeedTimeDiff(diff)
+      }
+      newTime()
+      timeDiffTimer.current = setInterval(newTime,1000 * 60)
     }
+    else
+      setLastFeedTimeDiff(null)
 
     return ()=>{
       clearInterval(timeDiffTimer.current)
     }
-  },[lastFeedTimeDiff,feedingEvents])
+  },[feedingEvents])
+
   const feed = (amount)=>{
     const now = Date.now();
     const ee = timeStampEvent({
-      delta: 0,
       time: now,
       amount
     })
@@ -72,8 +80,14 @@ function App() {
   useEffect(()=>{
     let evs = [...Array(localStorage.length)];
     evs = evs.map((_,i)=>{
-      return JSON.parse(localStorage.getItem(localStorage.key(i)));
+      const k = localStorage.key(i)
+      if(k.startsWith('feed')){
+        return JSON.parse(localStorage.getItem(k))
+      }
+      return null
     })
+    .filter((v,i) => v !== null)
+    .sort((a,b) => b.time - a.time)
     setFeedingEvents(evs);
   },[])
   
@@ -235,23 +249,27 @@ function App() {
       }
       
       <hr />
-      <div className={'LiveStatus ' + (sensorsArmed ? 'Arm' : 'Disarm')}>
-        {/* <div className='Locations'>
-          <img alt=""  className='Icon SVG Road'/>
-          <img alt=""  className='Icon SVG Garden'/>
-        </div> */}
-        <button onClick={()=>{
-          setSensorsArmed(s=>!s)
-        }}>
-          <img className={'Icon SVG Power'} />
-          Arm
-        </button>
-      </div> 
+      
       <section className={'List Monitor '} >
+        <div className={'LiveStatus ' + (sensorsArmed ? 'Arm' : 'Disarm')}>
+          {/* <div className='Locations'>
+            <img alt=""  className='Icon SVG Road'/>
+            <img alt=""  className='Icon SVG Garden'/>
+          </div> */}
+          <button onClick={()=>{
+            setSensorsArmed(s=>!s)
+          }}>
+            <img className={'Icon SVG Power'} />
+            Arm
+          </button>
+        </div> 
         <ItemList items={monitorEvents}
         Template={({item, className, isPreview})=> 
         <div className={'EventItemContent ' + className}>
-          <p className='EventTime'>{item.timeHuman}</p>
+          <div className='EventTimeBanner'>
+            <p className='EventTime'>{item.timeHuman}</p>
+            <p className='EventDay'>{item.dateHuman}</p>
+          </div>
           <div className='EventBanner'>{item.now === 1 && item.prev === 2 ? 
           <>
             <img alt=""  className='Icon SVG Road'/>
@@ -287,12 +305,22 @@ function App() {
         <ItemList items={feedingEvents}
         Template={({item, className, isPreview})=>
           <li className={'FeedItemContent ' + className + (item.amount < 1 ? ' FeedHalf' : '')}>
-            {<p><i>{item.day}</i></p>}
-            <p className='EventTime'>{item.timeHuman}</p>
+            <div className={'EventTimeBanner'}>
+              {isPreview ? <>
+                <p className='EventTime'>{item.timeHuman}</p>
+                <p className='EventDay'>{item.dateHuman}</p>
+              </>
+              :
+              <>
+                <p className='EventTimeDelta'>{lastFeedTimeDiff + ' ago'}</p>
+                <p className='EventTimeSub'>{item.timeHuman}</p>
+              </>}
+            </div>
             <div className='EventBanner Feed'>
             <img alt=""  className={'Icon SVG Food'}/>
-            </div>
             {isPreview && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
+            </div>
+            
           </li>
         }  
         />

@@ -160,21 +160,46 @@ button:hover {
 
 .FeedItemContent,
 .EventItemContent {
-  display: flex;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
   align-items: center;
-  justify-content: space-evenly;
-  flex-grow: 1;
-}
-.FeedItemContent p,
-.EventItemContent p {
-  width: min-content;
 }
 
 .EventBanner {
   background-color: var(--ctheme-high);
   border-radius: 1rem;
-  width: max-content;
   padding: 0.25rem 1rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
+}
+
+.EventTimeBanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-wrap: nowrap;
+}
+.EventTimeBanner p{
+  margin: 0;
+}
+.EventTimeBanner .EventTime{
+  font-size: 3rem;
+}
+
+.EventTimeBanner .EventDay,
+.EventTimeBanner .EventTimeSub{
+  font-size: 1.5rem;
+  opacity: 0.4;
+}
+
+.EventTimeBanner .EventTimeDelta{
+  font-size: 4rem;
+}
+
+.List.Monitor {
+  filter: hue-rotate(-90deg);
+}
+.List.Food {
+  filter: hue-rotate(50deg);
 }
