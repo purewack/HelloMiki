@@ -51,21 +51,31 @@ function App() {
   const feed = (amount)=>{
     const now = Date.now();
     const ee = timeStampEvent({
+      delta: 0,
       time: now,
       amount
     })
 
-    const hnow = new Date(1000 * 60 * 60 * 5);
+    const hnow = new Date();
     const hlast = new Date(feedingEvents?.[0]?.time)
     const hdelta = hnow.getHours() - hlast.getHours();
-    // console.log(hnow, hlast, hdelta)
+    console.log(hnow, hlast, hdelta)
 
     if(hdelta < 0){
-      // console.log('clear')
+      console.log('clear')
+      localStorage.clear()
       setFeedingEvents([ee])
     }else
       setFeedingEvents(f => [ee,...f])
-  }
+    localStorage.setItem('feed'+now,JSON.stringify(ee));
+  }  
+  useEffect(()=>{
+    let evs = [...Array(localStorage.length)];
+    evs = evs.map((_,i)=>{
+      return JSON.parse(localStorage.getItem(localStorage.key(i)));
+    })
+    setFeedingEvents(evs);
+  },[])
   
   const [sensorMessage, setSensorMessage] = useState('Meow Meow');
   const [monitorEvents, setMonitorEvents] = useState([])
@@ -164,14 +174,14 @@ function App() {
 
   if(!appStart){
     return <div className='App Intro'>
-      <button onClick={()=>{
-        // catVoiceAlert('meow, Hello Miki!');
+      <header onClick={()=>{
+        catVoiceAlert('meow, Hello Miki!');
         setAppStart(true);
         setTime(Date.now());
       }}>
         <p className='Logo'>😻</p>
         <p>Hello Miki!</p>
-      </button>
+      </header>
     </div>
   }
 
@@ -198,6 +208,7 @@ function App() {
          
           <NavOption icon={'Bin'} title={'Clear Feeding'} action={()=>{
             setFeedingEvents([])
+            localStorage.clear();
           }}/>
           <NavOption icon={'Bin'} title={'Clear Events'} action={()=>{
             setMonitorEvents([])
@@ -225,10 +236,10 @@ function App() {
       
       <hr />
       <div className={'LiveStatus ' + (sensorsArmed ? 'Arm' : 'Disarm')}>
-        <div className='Locations'>
+        {/* <div className='Locations'>
           <img alt=""  className='Icon SVG Road'/>
           <img alt=""  className='Icon SVG Garden'/>
-        </div>
+        </div> */}
         <button onClick={()=>{
           setSensorsArmed(s=>!s)
         }}>
