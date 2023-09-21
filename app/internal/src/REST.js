@@ -36,41 +36,41 @@ export function getNetworkState(){
     })
 }
 
-export function getPastEvents(){
-    return  new Promise((resolve, rej)=>{
-            axios(address+'/events?action=get').then((resp)=>{
-            resolve(resp.data);
-        }).catch(()=>{
-            setTimeout(()=>{
-                resolve([
-                    {sensor_id:0, time: Date.now()},
-                    {sensor_id:1, time: Date.now() + 10000}
-                ])
-            },1000);
-        })
-    })
+// export function getPastEvents(){
+//     return  new Promise((resolve, rej)=>{
+//             axios(address+'/events?action=get').then((resp)=>{
+//             resolve(resp.data);
+//         }).catch(()=>{
+//             setTimeout(()=>{
+//                 resolve([
+//                     {sensor_id:0, time: Date.now()},
+//                     {sensor_id:1, time: Date.now() + 10000}
+//                 ])
+//             },1000);
+//         })
+//     })
+// }
+
+// export function getSensorArmState(){
+//     return  new Promise((resolve, rej)=>{
+//             axios(address+'/events?isArmed').then((resp)=>{
+//             resolve(resp.data);
+//         }).catch(()=>{
+//             setTimeout(()=>{
+//                 resolve(true)
+//             },1000);
+//         })
+//     })
+// }
+
+// export function setSensorArmState(state){
+//     axios(address+'/events?arm='+(state ? '1' : '0'));
+// }
+
+export function setServerTime(timestampUTC){
+    axios(address+'/time?set='+timestampUTC);
 }
 
-export function getSensorArmState(){
-    return  new Promise((resolve, rej)=>{
-            axios(address+'/events?isArmed').then((resp)=>{
-            resolve(resp.data);
-        }).catch(()=>{
-            setTimeout(()=>{
-                resolve(true)
-            },1000);
-        })
-    })
-}
-
-export function setSensorArmState(state){
-    axios(address+'/events?arm='+(state ? '1' : '0'));
-}
-
-export function setTime(timestampUTC){
-    axios(address+'/timeutc?set='+timestampUTC);
-}
-
-export function fetchTime(timestampUTC){
-    axios(address+'/timeutc?fetch');
+export function getServerUptime(){
+    return axios(address+'/time?uptime')
 }

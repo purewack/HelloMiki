@@ -5,14 +5,18 @@
 String saved_ssid;
 String saved_psk;
 
+void(*onConnectCallback)(void);
 NetState networkState = NET_IDLE;
-void networkSignalConnectTo(String ssid, String psk){
+
+void networkSignalConnectTo(String ssid, String psk, void(*onConnect)(void)){
     networkState = NET_TRY;
     saved_ssid = ssid;
     saved_psk = psk;
+    onConnectCallback = onConnect;
 }
-void networkSignalBootConnect(){
+void networkSignalBootConnect(void(*onConnect)(void)){
     networkState = NET_BOOT;
+    onConnectCallback = onConnect;
 }
 void networkSignalForget(){
 
@@ -81,6 +85,7 @@ void networkWatchdog(void(*onWifiState)(NetState state)){
         else {
             networkState = NET_OK;
             onWifiState(NET_OK);
+            if(onConnectCallback) onConnectCallback();
         }
     }
 }

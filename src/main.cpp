@@ -8,9 +8,18 @@ AsyncWebSocket ws("/ws/monitor");
 void setup() {
   setupMonitor();
 
-  Serial.begin(115200);
+  Serial.begin(74880);
   Serial.println();
   Serial.println("Hello Miki!");
+  Serial.print("Info :");
+  Serial.printf("id:%d speed:%d size:%d Rsize:%d mode:%d venid:%d\n", 
+    ESP.getFlashChipId(),
+    ESP.getFlashChipSpeed(), 
+    ESP.getFlashChipSize(), 
+    ESP.getFlashChipRealSize(), 
+    ESP.getFlashChipMode(),
+    ESP.getFlashChipVendorId());
+  Serial.print("Setting up ...");
 
   display.begin(0x3C, true); // Address 0x3C default
   display.clearDisplay();
@@ -32,8 +41,8 @@ void setup() {
   });
   server.on("/status/storage",  requestOnStatusStorage);
   server.on("/status/network",  requestOnStatusNetwork);
-  server.on("/events",  requestOnPastEvents);
-  server.on("/timeutc",  responseOnUTCTimeOffsetPost);
+  server.on("/time",  responseOnTime);
+  // server.on("/events",  requestOnPastEvents);
   
   setupUpdateServer();
 
@@ -42,7 +51,12 @@ void setup() {
 
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP("HelloMiki_AP");
-  networkSignalBootConnect();
+  networkSignalBootConnect([](){
+    Serial.println("done");
+    Serial.printf("Got IP: %s\n",WiFi.localIP().toString().c_str());
+  });
+
+  
 }
 
 String locString(int a){

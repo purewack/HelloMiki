@@ -28,9 +28,9 @@ enum NetState {
     NET_FAIL,
     NET_NULL
 };
-void networkSignalBootConnect();
 void networkSignalForget();
-void networkSignalConnectTo(String ssid, String psk);
+void networkSignalBootConnect(void(*onConnect)(void) = nullptr);
+void networkSignalConnectTo(String ssid, String psk, void(*onConnect)(void) = nullptr);
 void networkWatchdog(void(*onWifiState)(NetState state));
 
 void requestOnNetworkScan(AsyncWebServerRequest* request);
@@ -39,7 +39,7 @@ void responseOnSaveNetworkCred(AsyncWebServerRequest* request);
 void requestOnStatusStorage(AsyncWebServerRequest* request);
 void requestOnStatusNetwork(AsyncWebServerRequest* request);
 
-void responseOnUTCTimeOffsetPost(AsyncWebServerRequest* request);
+void responseOnTime(AsyncWebServerRequest* request);
 void requestOnPastEvents(AsyncWebServerRequest* request);
 
 void setupUpdateServer();

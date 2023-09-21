@@ -21,8 +21,8 @@ struct Event{
     Location last;
 };
 
-Event pastEventsBuf[64];
-sarray_t<Event> pastEvents;
+// Event pastEventsBuf[64];
+// sarray_t<Event> pastEvents;
 
 struct SensorEvent{
     bool state = 0;
@@ -49,6 +49,7 @@ struct SensorEvent{
             eventUnspent = true;
             // whenRising = millis();
             timeout = 500;
+            Serial.printf("sensor:%d\n",pin);
         }
         if(!state && stateOld) {
             // whenFalling = millis();
@@ -61,28 +62,29 @@ struct SensorEvent{
 SensorEvent sensors[3];
 
 void setupMonitor(){
-    pastEvents.buf = pastEventsBuf;
-    pastEvents.lim = 64;
-    sarray_clear(pastEvents);
+    // pastEvents.buf = pastEventsBuf;
+    // pastEvents.lim = 64;
+    // sarray_clear(pastEvents);
 
-    pinMode(D5,INPUT_PULLUP);
-    pinMode(D6,INPUT_PULLUP);
-    pinMode(D7,INPUT_PULLUP);
+    pinMode(14,INPUT);
+    pinMode(12,INPUT);
+    pinMode(13,INPUT);
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN,1);
 
-    sensors[0].pin = D5;
-    sensors[1].pin = D6;
-    sensors[2].pin = D7;
+    sensors[0].pin = 14;
+    sensors[1].pin = 12;
+    sensors[2].pin = 13;
 }
 
-void liveSave(Location currentLocation, Location lastLocation){
-    sarray_insert(pastEvents, {
-        timeOffset + double(millis()) - timeWhenSet,
-        currentLocation,
-        lastLocation
-    },0);
-}
+// void liveSave(Location currentLocation, Location lastLocation){
+//     sarray_insert(pastEvents, {
+//         timeOffset + double(millis()) - timeWhenSet,
+//         currentLocation,
+//         lastLocation
+//     },0);
+//     Serial.printf("ev:add @ 0 (%d/%d)\n",pastEvents.count,pastEvents.lim);
+// }
 
 void livePost(String &json, Location currentLocation, Location lastLocation){
     if(ws.availableForWriteAll()){
@@ -94,6 +96,7 @@ void livePost(String &json, Location currentLocation, Location lastLocation){
             JSON_KV(json,"prev", lastLocation);
         );
         ws.printfAll(json.c_str());
+        Serial.println(json.c_str());
     }
 }
 
@@ -116,14 +119,14 @@ void monitorWatchdog(void(*onSense)(int locNow, int locPrev)){
         if(currentLocation == GARDEN){
             lastLocation = currentLocation;
             currentLocation = ROAD;
-            liveSave(currentLocation,lastLocation);
+            // liveSave(currentLocation,lastLocation);
             livePost(json,currentLocation,lastLocation);
             onSense(currentLocation, lastLocation);
         }
         else if(currentLocation == ROAD){
             lastLocation = currentLocation;
             currentLocation = GARDEN;
-            liveSave(currentLocation,lastLocation);
+            // liveSave(currentLocation,lastLocation);
             livePost(json,currentLocation,lastLocation);
             onSense(currentLocation, lastLocation);
         }
@@ -135,7 +138,7 @@ void monitorWatchdog(void(*onSense)(int locNow, int locPrev)){
         // if(lastLocation == ROAD){ 
             lastLocation = currentLocation;
             currentLocation = GARDEN;
-            liveSave(currentLocation,lastLocation);
+            // liveSave(currentLocation,lastLocation);
             livePost(json,currentLocation,lastLocation);
             onSense(currentLocation, lastLocation);
         // }
@@ -193,44 +196,44 @@ void monitorWatchdog(void(*onSense)(int locNow, int locPrev)){
     
 }
 
-void requestOnPastEvents(AsyncWebServerRequest* request){
-    if(request->hasParam("action")){
-        auto p = request->getParam("action")->value();
-        if(p == "get"){
-            String json;
-            int ii = pastEvents.count > 10 ? 10 : pastEvents.count;
-            JSON_ARRAY(json,
-                for(unsigned int i=0; i<ii; i++){
-                    if(i) JSON_NEXT(json);
-                    JSON_OBJECT(json,
-                        JSON_KV(json, "time",pastEventsBuf[i].time);
-                            JSON_NEXT(json);
-                        JSON_KV(json, "now",int(pastEventsBuf[i].now));
-                            JSON_NEXT(json);
-                        JSON_KV(json, "prev",int(pastEventsBuf[i].last));
-                    );
-                }
-            );
-            request->send(200, "text/json", json);
-        }
-        else if(p == "clear"){
-            sarray_clear(pastEvents);
-            request->send(200);
-        }
-        else if(p == "count"){
-            request->send(200, "text/json", String(pastEvents.count));
-        }
-    }
-    if(request->hasParam("location")){
-        currentLocation = Location(request->getParam("location")->value().toInt());
-        request->send(200);
-    }
-    if(request->hasParam("arm")){
-        isArmed = request->getParam("arm")->value().toInt();
-        request->send(200);
-    }
-    if(request->hasParam("isArmed")){
-        request->send(200, "text/json", JBOOL(isArmed));
-    }
-    request->send(400);
-}
+// void requestOnPastEvents(AsyncWebServerRequest* request){
+//     if(request->hasParam("action")){
+//         auto p = request->getParam("action")->value();
+//         if(p == "get"){
+//             String json;
+//             int ii = pastEvents.count > 10 ? 10 : pastEvents.count;
+//             JSON_ARRAY(json,
+//                 for(unsigned int i=0; i<ii; i++){
+//                     if(i) JSON_NEXT(json);
+//                     JSON_OBJECT(json,
+//                         JSON_KV(json, "time",pastEventsBuf[i].time);
+//                             JSON_NEXT(json);
+//                         JSON_KV(json, "now",int(pastEventsBuf[i].now));
+//                             JSON_NEXT(json);
+//                         JSON_KV(json, "prev",int(pastEventsBuf[i].last));
+//                     );
+//                 }
+//             );
+//             request->send(200, "text/json", json);
+//         }
+//         else if(p == "clear"){
+//             sarray_clear(pastEvents);
+//             request->send(200);
+//         }
+//         else if(p == "count"){
+//             request->send(200, "text/json", String(pastEvents.count));
+//         }
+//     }
+//     if(request->hasParam("location")){
+//         currentLocation = Location(request->getParam("location")->value().toInt());
+//         request->send(200);
+//     }
+//     if(request->hasParam("arm")){
+//         isArmed = request->getParam("arm")->value().toInt();
+//         request->send(200);
+//     }
+//     if(request->hasParam("isArmed")){
+//         request->send(200, "text/json", JBOOL(isArmed));
+//     }
+//     request->send(400);
+// }

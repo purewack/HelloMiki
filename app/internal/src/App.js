@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState } from 'react';
-import { getNetworkList, getNetworkState, getPastEvents, setSensorArmState, setTime } from './REST';
+import { getNetworkList, getNetworkState, getServerUptime, setServerTime } from './REST';
+import {localStorageGetEvents, feed, motion, localStorageClearEvents} from './Helpers'
 
 import './App.css';
 import './Theme.css'
@@ -16,6 +17,8 @@ const catVoiceAlert = (text)=>{
   window.speechSynthesis.speak(msg);
 }
 
+let address = process.env?.REACT_APP_HW_SERVER_IP
+if(!address) address = window.location.hostname
 
 function App() {
   const [appStart, setAppStart] = useState(false);
@@ -25,16 +28,10 @@ function App() {
   const [networks, setNetworks] = useState([]);
   const [currentNetwork, setCurrentNetwork] = useState('No Network');
   
-  const timeStampEvent = (ev)=>{
-    return {
-      ...ev,
-      timeHuman: new Date(ev.time).toLocaleTimeString(),
-      dateHuman: new Date(ev.time).toLocaleDateString(),
-    }
-  }
-
   const [showFeeding, setShowFeeding] = useState(true)
   const [feedingEvents, setFeedingEvents] = useState([])
+  
+  //feeding time difference since last one
   const [lastFeedTimeDiff, setLastFeedTimeDiff] = useState();
   const timeDiffTimer = useRef();
   useEffect(()=>{
@@ -57,70 +54,39 @@ function App() {
     }
   },[feedingEvents])
 
-  const feed = (amount)=>{
-    const now = Date.now();
-    const ee = timeStampEvent({
-      time: now,
-      amount
-    })
+  const feedAmount = (amount)=>{
+    feed(amount, feedingEvents?.[0]?.time, setFeedingEvents)
+  }
 
-    const hnow = new Date();
-    const hlast = new Date(feedingEvents?.[0]?.time)
-    const hdelta = hnow.getHours() - hlast.getHours();
-    console.log(hnow, hlast, hdelta)
 
-    if(hdelta < 0){
-      console.log('clear')
-      localStorage.clear()
-      setFeedingEvents([ee])
-    }else
-      setFeedingEvents(f => [ee,...f])
-    localStorage.setItem('feed'+now,JSON.stringify(ee));
-  }  
   useEffect(()=>{
-    let evs = [...Array(localStorage.length)];
-    evs = evs.map((_,i)=>{
-      const k = localStorage.key(i)
-      if(k.startsWith('feed')){
-        return JSON.parse(localStorage.getItem(k))
-      }
-      return null
-    })
-    .filter((v,i) => v !== null)
-    .sort((a,b) => b.time - a.time)
-    setFeedingEvents(evs);
+    localStorageGetEvents('feed',setFeedingEvents)
   },[])
   
-  const [sensorMessage, setSensorMessage] = useState('Meow Meow');
   const [monitorEvents, setMonitorEvents] = useState([])
-  const [liveStatus, setLiveStatus] = useState('wait');
-  const liveEvent = useRef();
+  const [sensorMessage, setSensorMessage] = useState('Meow Meow');
   const [sensorsArmed, setSensorsArmed] = useState(true);
+  const [liveStatus, setLiveStatus] = useState('wait');
+ 
+  //WebSockets for live monitor events
+  const liveWS = useRef()
+  const [liveUptime, setLiveUptime] = useState(null)
+  const liveWDT = useRef()
   useEffect(()=>{
 
     let openWS;
     const onWSOpen = (ev)=>{
       console.log(ev)
       setLiveStatus('open')
-      liveEvent.current.timer = undefined
+      localStorageGetEvents('motion',setMonitorEvents)
     }
     const onWSClose = (ev)=>{
       console.log(ev)
       setLiveStatus('close')
-      if(!ev.wasClean){
-        liveEvent.current.timer = setTimeout(()=>{
-          console.log('connect retry')
-          openWS()
-        },1000)
-      }
     }
     const onWSError = (ev)=>{
       console.log(ev)
       setLiveStatus('error')
-      // liveEvent.current.timer = setTimeout(()=>{
-      //   console.log('connect retry')
-      //   openWS()
-      // },1000)
     }
     const onWSMessage = (ev)=>{
       console.log(ev.data)
@@ -130,33 +96,45 @@ function App() {
       if(event.now == 1){
         catVoiceAlert(sensorMessage)
       }
-
-      //save to log
-      setMonitorEvents(e => [timeStampEvent(event), ...e])
+      //save to log (localstorage)
+      motion({now:event.now}, monitorEvents?.[0]?.time, setMonitorEvents)
     }
 
     openWS = ()=>{
-      let address = process.env?.REACT_APP_HW_SERVER_IP
-      if(!address) address = window.location.hostname
+      const st = liveWS.current?.readyState
+      if(st === WebSocket.OPEN 
+      || st === WebSocket.CONNECTING ) return
       const ws = new WebSocket(`ws://${address}/ws/monitor`);
       ws.onmessage = onWSMessage;
       ws.onerror   = onWSError;
       ws.onclose   = onWSClose;
       ws.onopen    = onWSOpen;
-      liveEvent.current = {ws}
-    }
-    const closeWS = ()=>{
-      if(liveEvent.current?.ws) liveEvent.current.ws.close()
+      liveWS.current = ws;
+      setServerTime(Date.now());
     }
 
-    if(sensorsArmed)
-    openWS()
+    if(sensorsArmed){
+      const doConnection = ()=>{
+        console.log(liveWS.current?.readyState)
+        if(!liveWS.current || liveWS.current?.readyState === WebSocket.CLOSED) openWS()
+        else if(liveWS.current?.readyState === WebSocket.OPEN) liveWS.current?.send('alive')
+      }
+      liveWDT.current = setInterval(()=>{
+        doConnection()
+      },5000)
+      doConnection()
+    }
 
     return ()=>{
-      closeWS()
-      if(liveEvent.current?.timer) clearTimeout(liveEvent.current.timer)
+      if(liveWS.current?.readyState === WebSocket.OPEN){
+        liveWS.current.close()
+        console.log("closing WS", liveWS.current)
+      }
+
+      clearInterval(liveWDT?.current)
     }
   },[sensorsArmed])
+
   
   const networkFetch = ()=>{
     setNetworks([
@@ -179,9 +157,6 @@ function App() {
       setCurrentNetwork('No Network')
     })
 
-    getPastEvents().then(ev => {
-      setMonitorEvents(ev.map(e=>timeStampEvent(e)));
-    })
   },[])
 
   const [showNav, setShowNav] = useState(false)
@@ -191,7 +166,6 @@ function App() {
       <header onClick={()=>{
         catVoiceAlert('meow, Hello Miki!');
         setAppStart(true);
-        setTime(Date.now());
       }}>
         <p className='Logo'>😻</p>
         <h1>Hello Miki!</h1>
@@ -211,7 +185,7 @@ function App() {
         {/* <img alt=""  src={icon}/> */}
       </header> 
       
-      {showNav &&
+      {showNav && <>
       <NavBar >
         <NavSet >
           <NavOption icon={'BackArrow'} title={'Back'} action={()=>{setShowNav(false)}} />
@@ -223,10 +197,11 @@ function App() {
          
           <NavOption icon={'Bin'} title={'Clear Feeding'} action={()=>{
             setFeedingEvents([])
-            localStorage.clear();
+            localStorageClearEvents('feed')
           }}/>
           <NavOption icon={'Bin'} title={'Clear Events'} action={()=>{
             setMonitorEvents([])
+            localStorageClearEvents('motion')
           }}/>
           
           <NavOption icon={'Cog'} title="Fullscreen" action={()=>{
@@ -235,21 +210,21 @@ function App() {
           <NavOption icon={'Hear'} title="Test Alert" action={()=>{
             catVoiceAlert('meow')
           }}/>
-          <NavOption toSection="time" icon={'Time'} title="Time" />
+          {/* <NavOption toSection="time" icon={'Time'} title="Time" /> */}
         </NavSet>
 
-        <NavSet section="time" back>        
+        {/* <NavSet section="time" back>        
           <NavOption icon={'Wifi'} title="Use Online time" autoReturn/>
           <NavOption icon={'Time'} title="Use device time" autoReturn action={()=>{
             console.log(Date.now())
             setTime(Date.now());
           }}/>
           <NavOption icon={'Cog'} title="Set time manually" />    
-        </NavSet>
+        </NavSet> */}
       </NavBar>
-      }
-      
       <hr />
+      </>}
+      
       
       <section className={'List Monitor '} >
         <div className={'LiveStatus ' + (sensorsArmed ? 'Arm' : 'Disarm')}>
@@ -299,8 +274,8 @@ function App() {
         {/* <h1>Food</h1>  */}
         <NavBar>
           <NavSet>
-            <NavOption icon={'Food'} title={'1'}   action={()=>{feed(1)}}/>
-            <NavOption icon={'Food'} title={'1/2'} action={()=>{feed(0.5)}} className='FeedHalf' />
+            <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
+            <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
           </NavSet>
         </NavBar>
         <ItemList items={feedingEvents}

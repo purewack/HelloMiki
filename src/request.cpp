@@ -15,12 +15,17 @@ void requestOnStatusStorage(AsyncWebServerRequest* request){
     request->send(200, "text/json", json);
 }
  
-void responseOnUTCTimeOffsetPost(AsyncWebServerRequest* request){
+void responseOnTime(AsyncWebServerRequest* request){
     if(request->hasParam("set")){
         timeOffset = request->getParam("set")->value().toDouble();
         timeWhenSet = double(millis());
         Serial.println(timeOffset);
         request->send(204);
+    }
+    else if(request->hasParam("uptime")){
+        String s;
+        s += double(millis());
+        request->send(200, "text/json", s);
     }
     request->send(400);
 }
