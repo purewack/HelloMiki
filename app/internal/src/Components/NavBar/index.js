@@ -55,7 +55,7 @@ export function NavOption({
       if(autoReturn) navigate()
     }}>
       <h2>{title}</h2>
-      <img className={'Icon SVG ' + icon} alt={icon}/>
+      {icon && <img className={'Icon SVG ' + icon} alt={icon}/>}
     </button>
   </li>
 }

@@ -10,6 +10,7 @@ import { NavBar, NavOption, NavSet } from './Components/NavBar';
 import ItemList from './Components/ItemList/index';
 import PopUp from './Components/PopUp';
 
+const versions = <><p>App v1.2</p><p>Server v1.1</p></>
 
 const catVoiceAlert = (text)=>{
   let msg = new SpeechSynthesisUtterance();
@@ -170,7 +171,7 @@ function App() {
         <p className='Logo'>😻</p>
         <h1>Hello Miki!</h1>
       </header>
-      <h2 className='Version'>v1.1</h2>
+      <h2 className='Version'>{versions}</h2>
     </div>
   }
 
@@ -211,6 +212,9 @@ function App() {
             catVoiceAlert('meow')
           }}/>
           {/* <NavOption toSection="time" icon={'Time'} title="Time" /> */}
+          <NavOption title={versions} action={()=>{
+            document.location.href = `http://${document.location.hostname}/device`;
+          }}/>
         </NavSet>
 
         {/* <NavSet section="time" back>        
