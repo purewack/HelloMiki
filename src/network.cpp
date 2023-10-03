@@ -36,6 +36,10 @@ void networkWatchdog(void(*onWifiState)(NetState state)){
         file.print(wpaSeparator);
         file.close();
 
+        Serial.println("saved creds:");
+        Serial.println(saved_ssid);
+        Serial.println(saved_psk);
+
         WiFi.disconnect();
         WiFi.begin(saved_ssid,saved_psk);
         networkState = NET_BUSY;
@@ -57,10 +61,16 @@ void networkWatchdog(void(*onWifiState)(NetState state)){
             WiFi.disconnect();
             WiFi.begin(saved_ssid,saved_psk);
             networkState = NET_BUSY;
+
+            Serial.println("try connect:");
+            Serial.println(saved_ssid);
+            Serial.println(saved_psk);
         }
         else{
             networkState = NET_NULL;
             onWifiState(NET_NULL);
+            Serial.println("no network chosen");
+            if(onConnectCallback) onConnectCallback();
         }
     }
     
@@ -69,6 +79,7 @@ void networkWatchdog(void(*onWifiState)(NetState state)){
         connnectionCounter = 0;
         lastConnectTimeout = millis() + 1000;
         onWifiState(NET_CONNECTING);
+        Serial.println("try connect: waiting");
     }
     if(networkState == NET_CONNECTING){
         if (WiFi.status() != WL_CONNECTED ) {
@@ -79,12 +90,15 @@ void networkWatchdog(void(*onWifiState)(NetState state)){
                 if(connnectionCounter >= 30){  
                     networkState = NET_FAIL;
                     onWifiState(NET_FAIL);
+                    Serial.println("try connect: fail, removing saved credentials");
+                    LittleFS.remove("private/wpa.txt");
                 }
             }
         }
         else {
             networkState = NET_OK;
             onWifiState(NET_OK);
+            Serial.println("try connect: ok");
             if(onConnectCallback) onConnectCallback();
         }
     }
@@ -101,13 +115,13 @@ void responseOnSaveNetworkCred(AsyncWebServerRequest* request){
 }
 
 void responseOnSaveNetworkForget(AsyncWebServerRequest* request){
-    if(request->hasArg("SSID") && request->hasArg("PSK")){
-        auto response = request->beginResponse_P(301, "text/html", "");
-        response->addHeader("Location", "/");
-        response->addHeader("Cache-Control", "no-cache");
-        request->send(response);
-        networkSignalForget();
-    }
+   
+    auto response = request->beginResponse_P(301, "text/html", "");
+    response->addHeader("Location", "/");
+    response->addHeader("Cache-Control", "no-cache");
+    request->send(response);
+    networkSignalForget();
+    
 }
 
 void requestOnNetworkScan(AsyncWebServerRequest* request){
