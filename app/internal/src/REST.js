@@ -1,76 +1,81 @@
 import axios from 'axios'
 
-let address = process.env?.REACT_APP_HW_SERVER_IP
-if(address) address = 'http://' + address
-else address = ''
+let apiAddress;
+let emulateApi = (process.env.NODE_ENV === "development" && !process.env?.REACT_APP_HW_SERVER_IP);
+
+export function setApiAddress(ip){
+    if(ip){
+        apiAddress = 'http://' + ip
+        emulateApi = false
+    }
+    else{
+        apiAddress = ''        
+        emulateApi = true
+    }
+}
+if(process.env?.REACT_APP_HW_SERVER_IP){
+    setApiAddress(process.env?.REACT_APP_HW_SERVER_IP)
+}
+
+export function getApiAddress(){
+    return apiAddress
+}
+export function toggleEmulateApi(){
+    emulateApi = !emulateApi
+}
+export function isApiEmulate(){
+    return emulateApi
+}
 
 export function getNetworkList(){
     return new Promise((resolve, rej)=>{
-        axios(address+'/network/scan').then((resp)=>{
-            resolve(resp.data);
-        }).catch(()=>{
+        if(!emulateApi){
+            axios(apiAddress+'/network/scan').then((resp)=>{
+                resolve(resp.data);
+            })
+        }
+        else{
             setTimeout(()=>{
                 resolve([
-                    {ssid:"network3", strength:-70,channel:2, wps: false},
-                    {ssid:"network_main", strength:-40, channel:0, wps: true},
-                    {ssid:"networkA_", strength:-60, channel:1, wps: false},
-                    {ssid:"networkA", strength:-50, channel:0, wps: true},
-                    {ssid:"network_rand_"+Math.random(), strength:-90*Math.random(),channel:1, wps: true},
+                    {ssid:"*_FAKE_network1_*", strength:-70, channel:2, wps: false},
+                    {ssid:"*_FAKE_network2_*", strength:-40, channel:0, wps: true},
+                    {ssid:"*_FAKE_network3_*", strength:-60, channel:1, wps: false},
+                    {ssid:"*_FAKE_network4_*", strength:-50, channel:0, wps: true},
+                    {ssid:"*_FAKE_network"+Math.random(), strength:-90*Math.random(),channel:1, wps: true},
                 ])
             },1000);
-        })
+        }
     })
 }
 
 export function getNetworkState(){
     return new Promise((resolve, rej)=>{
-        axios(address+'/status/network').then((resp)=>{
-            resolve(resp.data);
-        }).catch(()=>{
+        if(!emulateApi){
+            axios(apiAddress+'/status/network').then((resp)=>{
+                resolve(resp.data);
+            })
+        }
+        else{   
             setTimeout(()=>{
                 resolve(
-                    {ssid:"network3", strength:-70}
+                    {ssid:"*_FAKE_network3_*", strength:-70}
                 )
             },1000);
-        })
+        }
     })
 }
 
-// export function getPastEvents(){
-//     return  new Promise((resolve, rej)=>{
-//             axios(address+'/events?action=get').then((resp)=>{
-//             resolve(resp.data);
-//         }).catch(()=>{
-//             setTimeout(()=>{
-//                 resolve([
-//                     {sensor_id:0, time: Date.now()},
-//                     {sensor_id:1, time: Date.now() + 10000}
-//                 ])
-//             },1000);
-//         })
-//     })
-// }
-
-// export function getSensorArmState(){
-//     return  new Promise((resolve, rej)=>{
-//             axios(address+'/events?isArmed').then((resp)=>{
-//             resolve(resp.data);
-//         }).catch(()=>{
-//             setTimeout(()=>{
-//                 resolve(true)
-//             },1000);
-//         })
-//     })
-// }
-
-// export function setSensorArmState(state){
-//     axios(address+'/events?arm='+(state ? '1' : '0'));
-// }
-
 export function setServerTime(timestampUTC){
-    axios(address+'/time?set='+timestampUTC);
+    if(!emulateApi){
+        axios(apiAddress+'/time?set='+timestampUTC);
+    }
 }
 
 export function getServerUptime(){
-    return axios(address+'/time?uptime')
+    if(!emulateApi){
+        return axios(apiAddress+'/time?uptime')
+    }
+    return new Promise((res,rej)=>{
+        res(10000);
+    })
 }

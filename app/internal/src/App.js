@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState } from 'react';
-import { getNetworkList, getNetworkState, getServerUptime, setServerTime } from './REST';
+import { getNetworkList, getNetworkState, getServerUptime, setServerTime, isApiEmulate } from './REST';
 import {localStorageGetEvents, feed, motion, localStorageClearEvents} from './Helpers'
 
 import './App.css';
@@ -10,6 +10,7 @@ import { NavBar, NavOption, NavSet } from './Components/NavBar';
 import ItemList from './Components/ItemList/index';
 import PopUp from './Components/PopUp';
 
+const inDev = process.env.NODE_ENV === 'development'
 const versions = <><p>App v1.2</p><p>Server v1.1</p></>
 
 const catVoiceAlert = (text)=>{
@@ -41,7 +42,7 @@ function App() {
         const now = new Date();
         const dt = new Date(now - feedingEvents[0].time);
         const diff = dt.getHours()-1 + 'h ' + dt.getMinutes() + 'min'
-        console.log(diff, dt, now)
+        // console.log(diff, dt, now)
         setLastFeedTimeDiff(diff)
       }
       newTime()
@@ -120,10 +121,13 @@ function App() {
         if(!liveWS.current || liveWS.current?.readyState === WebSocket.CLOSED) openWS()
         else if(liveWS.current?.readyState === WebSocket.OPEN) liveWS.current?.send('alive')
       }
-      liveWDT.current = setInterval(()=>{
+
+      if(!isApiEmulate()){
+        liveWDT.current = setInterval(()=>{
+          doConnection()
+        },5000)
         doConnection()
-      },5000)
-      doConnection()
+      }
     }
 
     return ()=>{
@@ -171,7 +175,20 @@ function App() {
         <p className='Logo'>😻</p>
         <h1>Hello Miki!</h1>
       </header>
-      <h2 className='Version'>{versions}</h2>
+      {inDev ? 
+        <div style={{
+          padding: '1rem',
+          margin: '1rem',
+          borderRadius: '1rem',
+          background: 'lightblue',
+          color: 'blue'
+        }}>
+          <h2><i>DEV BUILD</i></h2>
+          <h3>{process.env?.REACT_APP_HW_SERVER_IP ? process.env?.REACT_APP_HW_SERVER_IP : 'Emulated API'}</h3>
+        </div>
+      :
+        <h2 className='Version'>{versions}</h2>
+      }
     </div>
   }
 
@@ -179,7 +196,7 @@ function App() {
     <div className="App" ref={appRef}>
       <header className="Title" onClick={()=>{setShowNav(n=>!n)}}>
         <div className='Text'>
-        <h1>Hello-Miki</h1>
+        <h1>Hello Miki</h1>
         <h3><i>{currentNetwork}</i></h3>
         </div>
         <span className={'Logo Main ' + liveStatus}>😻</span>
@@ -205,10 +222,10 @@ function App() {
             localStorageClearEvents('motion')
           }}/>
           
-          <NavOption icon={'Cog'} title="Fullscreen" action={()=>{
+          {/* <NavOption icon={'Cog'} title="Fullscreen" action={()=>{
               appRef.current.requestFullscreen()
-          }} /> 
-          <NavOption icon={'Hear'} title="Test Alert" action={()=>{
+          }} />  */}
+          <NavOption icon={'Hear'} title="Test Speaker" action={()=>{
             catVoiceAlert('meow')
           }}/>
           {/* <NavOption toSection="time" icon={'Time'} title="Time" /> */}
