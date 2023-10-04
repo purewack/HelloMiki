@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-let apiAddress;
-let emulateApi = (process.env.NODE_ENV === "development" && !process.env?.REACT_APP_HW_SERVER_IP);
+let apiAddress = '';
+let emulateApi = (!process.env?.REACT_APP_HW_SERVER_IP) && (process.env.NODE_ENV !== 'production');
 
 export function setApiAddress(ip){
     if(ip){
@@ -13,26 +13,26 @@ export function setApiAddress(ip){
         emulateApi = true
     }
 }
-if(process.env?.REACT_APP_HW_SERVER_IP){
-    setApiAddress(process.env?.REACT_APP_HW_SERVER_IP)
-}
+const hwip = process.env?.REACT_APP_HW_SERVER_IP
+if(hwip) setApiAddress(hwip);
 
 export function getApiAddress(){
-    return apiAddress
+    return apiAddress;
 }
 export function toggleEmulateApi(){
-    emulateApi = !emulateApi
+    emulateApi = !emulateApi;
 }
 export function isApiEmulate(){
-    return emulateApi
+    return emulateApi;
 }
 
 export function requestMockEvent(){
+    if(emulateApi) return null;
     return {
         time: Date.now(),
         prev: 1,
         now: 1
-    }
+    };
 }
 
 export function getNetworkList(){

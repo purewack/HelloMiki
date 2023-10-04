@@ -80,7 +80,7 @@ function App() {
     const event = JSON.parse(ev.data)
 
     //voice alert if motion sensor event
-    if(event.now == 1){
+    if(event.now == 1 && !inDev){
       catVoiceAlert(sensorMessage)
     }
     //save to log (localstorage)
@@ -154,7 +154,7 @@ function App() {
       {loading: true},
       {loading: true},
     ]);
-    getNetworkList().then(l => setNetworks(l))
+    getNetworkList().then(l => setNetworks(l.sort((a,b)=>b.strength - a.strength)))
   }
 
   useEffect(()=>{
@@ -173,7 +173,7 @@ function App() {
   if(!appStart){
     return <div className='App Intro'>
       <header onClick={()=>{
-        catVoiceAlert('meow, Hello Miki!');
+        if(!inDev) catVoiceAlert('meow, Hello Miki!');
         setAppStart(true);
       }}>
         <p className='Logo'>😻</p>
