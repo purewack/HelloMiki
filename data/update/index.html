@@ -143,7 +143,7 @@
         const onVerFail = ()=>{
             ver.innerHTML = "Cannot load server version. " + appVer() 
         }
-        fetch(`http://${window.location.hostname}/status/version`).then(resp => {
+        fetch("http://"+window.location.hostname+'/status/version').then(resp => {
             resp.json().then(j => {
                 ver.innerHTML = 'Server: ' + j + appVer()
             }).catch(onVerFail)
@@ -162,7 +162,7 @@
         const updateLabel = document.querySelector('#updateLabel')
         
         const onWSmessage = ev=>{
-            console.log(ev)
+            // console.log(ev)
             const data = JSON.parse(ev.data)
             if(data.type === 'ota'){
                 updateLabel.setAttribute('data-state',data.state );

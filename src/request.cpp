@@ -31,7 +31,7 @@ void responseOnTime(AsyncWebServerRequest* request){
 }
 
 void requestVersionTag(AsyncWebServerRequest* request){
-    request->send(200, "text/json", SERVER_VERSION);
+    request->send(200, "text/json", "\""SERVER_VERSION"\"");
 }
 
 void requestRestart(int inTime){
