@@ -21,8 +21,11 @@ const catVoiceAlert = (text)=>{
 let address = process.env?.REACT_APP_HW_SERVER_IP
 if(!address) address = window.location.hostname
 
+
 function App() {
-  const [appStart, setAppStart] = useState(false);
+  const search = new URLSearchParams(window.location.search);
+  const [appStart, setAppStart] = useState(search.get('postupdate') === 'app');
+  const [updateInProgress, setUpdateInProgress] = useState();
   const appRef = useRef();
 
   const [showNetwork, setShowNetwork] = useState(false)
@@ -79,12 +82,23 @@ function App() {
     console.log(ev.data)
     const event = JSON.parse(ev.data)
 
-    //voice alert if motion sensor event
-    if(event.now == 1 && !inDev){
-      catVoiceAlert(sensorMessage)
+    if(event.type === 'sensor'){
+      //voice alert if motion sensor event
+      if(event.now == 1){
+        catVoiceAlert(sensorMessage)
+      }
+      //save to log (localstorage)
+      motion({now:event.now}, monitorEvents?.[0]?.time, setMonitorEvents)
     }
-    //save to log (localstorage)
-    motion({now:event.now}, monitorEvents?.[0]?.time, setMonitorEvents)
+    if(event.type === 'update'){
+      console.log('update in prog...', event?.where);
+      setUpdateInProgress(event.where);
+    }
+    if(event.type === 'refresh' && event?.where === "app_page"){
+      setUpdateInProgress(null);
+      console.log('Post-update app build upload, should refresh')
+      window.location.search = 'postupdate=app';
+    }
   }
 
   useEffect(()=>{
@@ -119,9 +133,9 @@ function App() {
 
     if(sensorsArmed){
       const doConnection = ()=>{
-        console.log(liveWS.current?.readyState)
+        // console.log(liveWS.current?.readyState)
         if(!liveWS.current || liveWS.current?.readyState === WebSocket.CLOSED) openWS()
-        else if(liveWS.current?.readyState === WebSocket.OPEN) liveWS.current?.send('alive')
+        else if(liveWS.current?.readyState === WebSocket.OPEN) liveWS.current?.send('1') //alive signal for server
       }
 
       if(!isApiEmulate()){
@@ -165,6 +179,13 @@ function App() {
     }).catch(()=>{
       setCurrentNetwork('No Network')
     })
+
+    if(search.get('postupdate')){
+      //clear post update url address no refresh
+      const url = new URL(window.location.href)
+      url.searchParams.delete('postupdate');
+      window.history.replaceState(window.history.state, '', url.href);
+    }
 
   },[])
 
@@ -234,6 +255,17 @@ function App() {
           <NavOption title={'Update Panel'} action={()=>{
             document.location.href = `http://${document.location.hostname}/device?appVersion=${process.env.REACT_APP_VERSION}`;
           }}/>
+
+          {inDev && <>
+            <NavOption title='postupdate' action={()=>{
+              const ev = {data: JSON.stringify({type:'refresh',where:'app_page'})};
+              onWSMessage(ev)
+            }}/>
+            <NavOption title='update' action={()=>{
+              const ev = {data: JSON.stringify({type:'update',where:'ota'})};
+              onWSMessage(ev)
+            }}/>
+          </>}
         </NavSet>
 
         {/* <NavSet section="time" back>        
@@ -352,6 +384,11 @@ function App() {
         <NetworkPicker networks={networks} onRefresh={()=>{
           networkFetch();
         }} /> 
+      </PopUp>
+
+      <PopUp noControl trigger={updateInProgress}>
+        <h1>Updating...</h1>
+        <h2>[{updateInProgress}]</h2>
       </PopUp>
     </div>
   );

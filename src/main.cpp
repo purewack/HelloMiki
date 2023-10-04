@@ -4,7 +4,6 @@
 Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws/monitor");
-AsyncWebSocket wsUpdate("/ws/update");
 
 void setup() {
   setupMonitor();
@@ -35,7 +34,6 @@ void setup() {
   MDNS.addService("http", "tcp", 80);
   
   server.addHandler(&ws);
-  server.addHandler(&wsUpdate);
   server.serveStatic("/", LittleFS, "/public").setDefaultFile("index.html");
   server.on("/network/scan", requestOnNetworkScan); 
   server.on("/network/select", [=](AsyncWebServerRequest* request){
@@ -71,13 +69,9 @@ String locString(int a){
 int resetCountdown = 0;
 NetState wifiState = NET_IDLE;
 void loop() {
-  if(resetCountdown) {
-    resetCountdown--;
-    if(!resetCountdown) ESP.reset();
-  }
+  resetWatchdog();
 
   ws.cleanupClients();
-  wsUpdate.cleanupClients();
   MDNS.update();
 
   monitorWatchdog([](int now, int prev){

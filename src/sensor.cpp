@@ -94,6 +94,8 @@ void livePost(String &json, Location currentLocation, Location lastLocation){
             JSON_KV(json,"now", currentLocation);
                 JSON_NEXT(json);
             JSON_KV(json,"prev", lastLocation);
+                JSON_NEXT(json);
+            JSON_KV_STR(json,"type", "sensor");
         );
         ws.printfAll(json.c_str());
         Serial.println(json.c_str());

@@ -16,7 +16,6 @@
 
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;
-extern AsyncWebSocket wsUpdate;
 
 extern double timeOffset;
 extern double timeWhenSet;
@@ -48,6 +47,7 @@ void requestOnPastEvents(AsyncWebServerRequest* request);
 void requestVersionTag(AsyncWebServerRequest* request);
 
 extern int resetCountdown;
+void resetWatchdog();
 void requestRestart(int inTime = 10000);
 
 void setupUpdateServer();
