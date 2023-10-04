@@ -11,7 +11,6 @@ import ItemList from './Components/ItemList/index';
 import PopUp from './Components/PopUp';
 
 const inDev = process.env.NODE_ENV === 'development'
-const versions = <><p>App v1.2</p><p>Server v1.1</p></>
 
 const catVoiceAlert = (text)=>{
   let msg = new SpeechSynthesisUtterance();
@@ -70,7 +69,7 @@ function App() {
   const [sensorMessage, setSensorMessage] = useState('Meow Meow');
   const [sensorsArmed, setSensorsArmed] = useState(true);
   const [liveStatus, setLiveStatus] = useState('wait');
- 
+  
   //WebSockets for live monitor events
   const liveWS = useRef()
   const [liveUptime, setLiveUptime] = useState(null)
@@ -180,7 +179,7 @@ function App() {
         <p className='Logo'>😻</p>
         <h1>Hello Miki!</h1>
       </header>
-      {inDev ? 
+      {inDev &&
         <div style={{
           padding: '1rem',
           margin: '1rem',
@@ -191,8 +190,6 @@ function App() {
           <h2><i>DEV BUILD</i></h2>
           <h3>{process.env?.REACT_APP_HW_SERVER_IP ? process.env?.REACT_APP_HW_SERVER_IP : 'Emulated API'}</h3>
         </div>
-      :
-        <h2 className='Version'>{versions}</h2>
       }
     </div>
   }
@@ -234,8 +231,8 @@ function App() {
             catVoiceAlert('meow')
           }}/>
           {/* <NavOption toSection="time" icon={'Time'} title="Time" /> */}
-          <NavOption title={versions} action={()=>{
-            document.location.href = `http://${document.location.hostname}/device`;
+          <NavOption title={'Update Panel'} action={()=>{
+            document.location.href = `http://${document.location.hostname}/device?appVersion=${process.env.REACT_APP_VERSION}`;
           }}/>
         </NavSet>
 

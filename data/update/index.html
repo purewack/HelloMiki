@@ -4,11 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        *{
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0.25rem;
+            /* border-radius: 1rem;  */
+        }
+
+        .main{
+            display: grid;
+            place-items: center;
+            grid-template-areas: 
+                "title title"
+                "nav nav";
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(4, 1fr);
+            min-height: 100vh;
+            width: 70%;
+            margin-left:auto;
+            margin-right: auto;
+            background-color: ivory;
+            filter: drop-shadow(0 0 10px lightgray);
+        }
+
+        #title {
+            font-size:  2rem;
+            grid-area: title;
+            text-align: center;
+        }
+
+        #nav {
+            grid-area: nav;
+        }
+
+        #ResetTag {
+            color: green;
+        }
+        #title:has(#ResetTag) {
+            color: transparent;
+        }
+        .main:has(#ResetTag) #nav{
+            opacity: 0;
+        }
+
+        button, input[type=submit], ::file-selector-button {
+            /* all:unset; */
+            /* border:none; */
+            padding: 1rem;
+            font-size: 1.5rem;
+            background-color: rgb(195, 255, 235);  
+        }
+        input[type=submit]{
+            font-weight: bold;
+            background-color: rgb(159, 255, 176); 
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            background-color: rgb(255, 238, 212);
+            padding: 1rem;
+        }
+        form label {
+            font-size: 1.5rem;
+        }
+
+        #updateLabel {
+            transition: background-color 0.25s;
+            text-align: center;
+            padding: 1rem;
+            position: relative;
+            isolation: isolate;
+        }
+        #updateLabel::after{
+            content: '';
+            position: absolute;
+            inset: 3px;
+            z-index: -1;
+            scale: var(--progress) 1;
+            transform-origin: left;
+        }
+        #updateLabel[data-state="wait"]{
+            display: none;
+        }
+        #updateLabel:not([data-state="wait"],[data-state="done"]){
+            border-color: lightblue;
+        }
+        #updateLabel[data-state="begin"]::after,
+        #updateLabel[data-state="busy"]::after {
+            background-color:peachpuff;
+        }
+        #updateLabel[data-state="done"]::after {
+            background-color:lightgreen;
+        }
+    </style>
 </head>
 <body>
-    <h1>Update Panel</h1>
+    <div class="main">
+    <div id="title">
+        <h1>Hello Miki 😻</h1>
+        <h2>Update Panel</h2>
+    </div>
 
-    <form method="post" enctype="multipart/form-data" action="/device/reset">
+    <form id="nav" method="post" enctype="multipart/form-data" action="/device/reset">
+        <p id="versionLabel"></p>
         <input type="submit" name="ota"  value="Reset Device"/>
     </form>
 
@@ -16,7 +115,7 @@
         <label for="ota">Hardware Firmware</label>
         <input id="otafile" type="file" name="ota"  value="Upload" accept=".bin, application/x-binary" />
         <input type="submit" name="ota"  value="Upload"/>
-        <p id="updateLabel"></p>
+        <p id="updateLabel" data-state="wait"></p>
     </form>
 
     <form method="post" enctype="multipart/form-data" action="/device/upload?type=public">
@@ -25,7 +124,32 @@
         <input type="submit" name="public_webapp"  value="Upload"/>
     </form>
 
+    <form method="post" enctype="multipart/form-data" action="/device/upload?type=this">
+        <label for="thispage">Update Panel files</label>
+        <input type="file" name="thispage" webkitdirectory mozdirectory value="Upload"/>
+        <input type="submit" name="thispage"  value="Upload"/>
+    </form>
+    </div>
+
     <script defer> 
+        const ver = document.querySelector('#versionLabel');
+        const isReset = (new URLSearchParams(window.location.search)).get('reset') !== null;
+        console.log(isReset)
+        const appVer = ()=>{
+            const urlParams = new URLSearchParams(window.location.search);
+            const appVer = urlParams.get('appVersion');
+            return ' App: ' + appVer
+        }
+        const onVerFail = ()=>{
+            ver.innerHTML = "Cannot load server version. " + appVer() 
+        }
+        fetch(`http://${window.location.hostname}/status/version`).then(resp => {
+            resp.json().then(j => {
+                ver.innerHTML = 'Server: ' + j + appVer()
+            }).catch(onVerFail)
+        }).catch(onVerFail)
+        
+
         const otaField = document.querySelector('#ota');
         const otaFile = document.querySelector('#otafile');
 
@@ -34,13 +158,30 @@
             console.log(otaField.action)
         }
 
-        const ws = new WebSocket("ws://"+window.location.hostname+"/ws/monitor");
+        const ws = new WebSocket("ws://"+window.location.hostname+"/ws/update");
         const updateLabel = document.querySelector('#updateLabel')
-        ws.onopen = ev=>{
-            updateLabel.innerHTML = "Await update";
+        
+        const onWSmessage = ev=>{
+            console.log(ev)
+            const data = JSON.parse(ev.data)
+            if(data.type === 'ota'){
+                updateLabel.setAttribute('data-state',data.state );
+                updateLabel.style.setProperty('--progress',data.progress);
+                updateLabel.innerHTML = Math.round((data.progress * 100)) + '%';
+            }
         }
-        ws.onmessage = ev=>{
-            updateLabel.innerHTML = ev.data;
+        ws.onmessage = onWSmessage;
+        
+        if(isReset){
+            const warn = document.createElement('div')
+            warn.id = 'ResetTag'
+            warn.innerHTML = 'Reset Complete'
+
+            const title = document.querySelector('#title')
+            title.appendChild(warn)
+            setTimeout(()=>{
+                title.removeChild(warn)
+            },2000)
         }
     </script>
 </body>

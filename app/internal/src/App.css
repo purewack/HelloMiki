@@ -1,9 +1,3 @@
-.App .Version{
-  position: fixed;
-  bottom: 0;
-  right: 0;
-}
-
 .App {
   font-size: calc(10px + 4vmin);
   display: flex;

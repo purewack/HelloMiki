@@ -11,9 +11,12 @@
 #include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebSrv.h>
- 
+
+#define SERVER_VERSION "H/W/D/3"
+
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;
+extern AsyncWebSocket wsUpdate;
 
 extern double timeOffset;
 extern double timeWhenSet;
@@ -41,5 +44,10 @@ void requestOnStatusNetwork(AsyncWebServerRequest* request);
 
 void responseOnTime(AsyncWebServerRequest* request);
 void requestOnPastEvents(AsyncWebServerRequest* request);
+
+void requestVersionTag(AsyncWebServerRequest* request);
+
+extern int resetCountdown;
+void requestRestart(int inTime = 10000);
 
 void setupUpdateServer();

@@ -14,7 +14,7 @@ void requestOnStatusStorage(AsyncWebServerRequest* request){
     );
     request->send(200, "text/json", json);
 }
- 
+
 void responseOnTime(AsyncWebServerRequest* request){
     if(request->hasParam("set")){
         timeOffset = request->getParam("set")->value().toDouble();
@@ -28,4 +28,12 @@ void responseOnTime(AsyncWebServerRequest* request){
         request->send(200, "text/json", s);
     }
     request->send(400);
+}
+
+void requestVersionTag(AsyncWebServerRequest* request){
+    request->send(200, "text/json", SERVER_VERSION);
+}
+
+void requestRestart(int inTime){
+    resetCountdown = inTime;
 }
