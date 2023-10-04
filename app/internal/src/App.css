@@ -183,6 +183,9 @@ button:hover {
   grid-template-columns: 3fr 1fr;
   align-items: center;
 }
+.FeedItemContent.Preview {
+  grid-template-columns: 1fr 3fr 1fr;
+}
 
 .EventBanner {
   background-color: var(--ctheme-high);

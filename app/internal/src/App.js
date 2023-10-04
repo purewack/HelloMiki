@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState } from 'react';
-import { getNetworkList, getNetworkState, getServerUptime, setServerTime, isApiEmulate } from './REST';
-import {localStorageGetEvents, feed, motion, localStorageClearEvents} from './Helpers'
+import { getNetworkList, getNetworkState, getServerUptime, setServerTime, isApiEmulate, requestMockEvent } from './REST';
+import {localStorageGetEvents, feed, motion, localStorageClearEvents, localStorageDeleteEvent} from './Helpers'
 
 import './App.css';
 import './Theme.css'
@@ -31,6 +31,7 @@ function App() {
   const [currentNetwork, setCurrentNetwork] = useState('No Network');
   
   const [showFeeding, setShowFeeding] = useState(true)
+  const [showFeedingList, setShowFeedingList] = useState(false)
   const [feedingEvents, setFeedingEvents] = useState([])
   
   //feeding time difference since last one
@@ -74,6 +75,19 @@ function App() {
   const liveWS = useRef()
   const [liveUptime, setLiveUptime] = useState(null)
   const liveWDT = useRef()
+  
+  const onWSMessage = (ev)=>{
+    console.log(ev.data)
+    const event = JSON.parse(ev.data)
+
+    //voice alert if motion sensor event
+    if(event.now == 1){
+      catVoiceAlert(sensorMessage)
+    }
+    //save to log (localstorage)
+    motion({now:event.now}, monitorEvents?.[0]?.time, setMonitorEvents)
+  }
+
   useEffect(()=>{
 
     let openWS;
@@ -89,17 +103,6 @@ function App() {
     const onWSError = (ev)=>{
       console.log(ev)
       setLiveStatus('error')
-    }
-    const onWSMessage = (ev)=>{
-      console.log(ev.data)
-      const event = JSON.parse(ev.data)
-
-      //voice alert if motion sensor event
-      if(event.now == 1){
-        catVoiceAlert(sensorMessage)
-      }
-      //save to log (localstorage)
-      motion({now:event.now}, monitorEvents?.[0]?.time, setMonitorEvents)
     }
 
     openWS = ()=>{
@@ -128,6 +131,8 @@ function App() {
         },5000)
         doConnection()
       }
+      else
+        console.log("emulated api, no WS")
     }
 
     return ()=>{
@@ -212,7 +217,7 @@ function App() {
             setShowNetwork(true);
           }} />
           <NavOption icon={'Food'} title='Toggle Feeding' action={()=>{setShowFeeding(f=>!f)}} />
-         
+          
           <NavOption icon={'Bin'} title={'Clear Feeding'} action={()=>{
             setFeedingEvents([])
             localStorageClearEvents('feed')
@@ -259,6 +264,13 @@ function App() {
             <img className={'Icon SVG Power'} />
             Arm
           </button>
+          {isApiEmulate() && <button onClick={()=>{
+            const ev = {data: JSON.stringify(requestMockEvent())};
+            onWSMessage(ev)
+          }}>
+            <img className='Icon SVG CatBlocky'/>
+            Trigger Sensor  
+          </button>}
         </div> 
         <ItemList items={monitorEvents}
         Template={({item, className, isPreview})=> 
@@ -297,11 +309,24 @@ function App() {
           <NavSet>
             <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
             <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
+            {showFeedingList && <NavOption icon={'Time'} title={'Late'} />}
           </NavSet>
         </NavBar>
         <ItemList items={feedingEvents}
+        shouldShow={showFeedingList}
+        onClick={()=>{setShowFeedingList(s=>!s)}}
         Template={({item, className, isPreview})=>
-          <li className={'FeedItemContent ' + className + (item.amount < 1 ? ' FeedHalf' : '')}>
+          <li className={'FeedItemContent ' 
+          + className 
+          + (isPreview ? ' Preview ' : '')  
+          }>
+            {isPreview && <div className='Actions'>
+              {/* <button><img className='Icon SVG Pen'/>Edit</button> */}
+              <button onClick={(ev)=>{
+                ev.stopPropagation()
+                localStorageDeleteEvent('feed', 'feed'+item.time, setFeedingEvents)
+              }}><img className='Icon SVG Bin'/></button>
+            </div>}
             <div className={'EventTimeBanner'}>
               {isPreview ? <>
                 <p className='EventTime'>{item.timeHuman}</p>
@@ -313,7 +338,7 @@ function App() {
                 <p className='EventTimeSub'>{item.timeHuman}</p>
               </>}
             </div>
-            <div className='EventBanner Feed'>
+            <div className={'EventBanner Feed ' + (item.amount < 1 ? ' FeedHalf' : '')}>
             <img alt=""  className={'Icon SVG Food'}/>
             {isPreview && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
             </div>

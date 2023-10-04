@@ -29,7 +29,11 @@ export function localStorageClearEvents(name){
   })
 }
 export function localStorageSetEvent(name,ev){
-  localStorage.setItem(name+Date.now(),JSON.stringify(ev));
+  localStorage.setItem(name+ev.time,JSON.stringify(ev));
+}
+export function localStorageDeleteEvent(name, key, setter){
+  localStorage.removeItem(key);
+  localStorageGetEvents(name, setter);
 }
 
 

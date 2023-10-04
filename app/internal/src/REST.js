@@ -27,6 +27,14 @@ export function isApiEmulate(){
     return emulateApi
 }
 
+export function requestMockEvent(){
+    return {
+        time: Date.now(),
+        prev: 1,
+        now: 1
+    }
+}
+
 export function getNetworkList(){
     return new Promise((resolve, rej)=>{
         if(!emulateApi){

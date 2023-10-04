@@ -30,6 +30,7 @@ export function NavSet({children, className='', back, selected, navigate, onActi
       </li>}
 
       {Children.map(children, c => {
+        if(c)
         return cloneElement(c, {navigate});
       })}
     </ul>
