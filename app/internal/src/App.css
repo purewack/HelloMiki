@@ -164,6 +164,9 @@ button:hover {
 .FeedHalf .Icon {
   mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 20%, rgba(255,255,255,0) 60%, rgba(255,255,255,0) 100%);
 }
+.FeedSnack .Icon {
+  mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 10%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 100%);
+}
 
 .Disarm .Icon{
   opacity: 0.2;

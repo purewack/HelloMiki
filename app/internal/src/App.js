@@ -61,6 +61,7 @@ function App() {
 
   const feedAmount = (amount)=>{
     feed(amount, feedingEvents?.[0]?.time, setFeedingEvents)
+    catVoiceAlert('yummy')
   }
 
 
@@ -84,7 +85,7 @@ function App() {
 
     if(event.type === 'sensor'){
       //voice alert if motion sensor event
-      if(event.now == 1){
+      if(event.now === 1){
         catVoiceAlert(sensorMessage)
       }
       //save to log (localstorage)
@@ -338,6 +339,7 @@ function App() {
           <NavSet>
             <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
             <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
+            <NavOption icon={'Food'} title={'Snack'} action={()=>{feedAmount(0.1)}} className='FeedSnack' />
             {showFeedingList && <NavOption icon={'Time'} title={'Late'} />}
           </NavSet>
         </NavBar>
@@ -367,9 +369,9 @@ function App() {
                 <p className='EventTimeSub'>{item.timeHuman}</p>
               </>}
             </div>
-            <div className={'EventBanner Feed ' + (item.amount < 1 ? ' FeedHalf' : '')}>
+            <div className={'EventBanner Feed ' + (item.amount > 0.5 ? '' : item.amount > 0.1 ? 'FeedHalf' : 'FeedSnack')}>
             <img alt=""  className={'Icon SVG Food'}/>
-            {isPreview && <p>{item.amount < 1 ? 'Half' : 'Whole'}</p>}
+            {isPreview && <p>{item.amount > 0.5 ? 'Whole' : item.amount > 0.1 ? 'Half' : 'Snack'}</p>}
             </div>
             
           </li>

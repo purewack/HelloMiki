@@ -27,8 +27,9 @@ export function isApiEmulate(){
 }
 
 export function requestMockEvent(){
-    if(emulateApi) return null;
+    // if(emulateApi) return null;
     return {
+        type: 'sensor',
         time: Date.now(),
         prev: 1,
         now: 1
