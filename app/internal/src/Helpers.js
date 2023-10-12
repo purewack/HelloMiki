@@ -37,29 +37,28 @@ export function localStorageDeleteEvent(name, key, setter){
 }
 
 
-export function setEventAuto(name,last,data,setter){
-  const now = Date.now();
+export function setEventAuto(name,last,data,setter, atTime = undefined){
   const ee = timeStampEvent({
-    time: now,
+    time: atTime ? atTime : Date.now(),
     ...data
   })
 
-  const hnow = new Date();
+  const hnow = new Date(atTime);
   const hlast = new Date(last)
   const hdelta = hnow.getHours() - hlast.getHours();
   // console.log(hnow, hlast, hdelta)
 
-  if(hdelta < 0){
+  if(hdelta < 0 && !atTime){
     localStorageClearEvents(name)
-    setter([ee])
+    setter([ee].sort((a,b) => b.time - a.time))
   }else
-    setter(f => [ee,...f])
+    setter(f => [ee,...f].sort((a,b) => b.time - a.time))
 
   localStorageSetEvent(name,ee)
 }  
-export function feed(amount, last = undefined, setter){
-  setEventAuto('feed',last,{amount},setter)
+export function feed(amount, last = undefined, setter, atTime = undefined){
+  setEventAuto('feed',last,{amount},setter, atTime)
 }
-export function motion(event, last = undefined, setter){
-  setEventAuto('motion',last,{event},setter)
+export function motion(event, last = undefined, setter, atTime = undefined){
+  setEventAuto('motion',last,{event},setter, atTime)
 }

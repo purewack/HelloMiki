@@ -34,7 +34,9 @@ function App() {
   
   const [showFeeding, setShowFeeding] = useState(true)
   const [showFeedingList, setShowFeedingList] = useState(false)
+  const [showFeedingLate, setShowFeedingLate] = useState(false)
   const [feedingEvents, setFeedingEvents] = useState([])
+  const feedLateRef = useRef();
   
   //feeding time difference since last one
   const [lastFeedTimeDiff, setLastFeedTimeDiff] = useState();
@@ -61,6 +63,19 @@ function App() {
 
   const feedAmount = (amount)=>{
     feed(amount, feedingEvents?.[0]?.time, setFeedingEvents)
+    catVoiceAlert('yummy')
+  }
+  const feedAmountLate = (amount)=>{
+    const t = feedLateRef.current.value.split(':');
+    const d = new Date();
+    d.setHours(t[0])
+    d.setMinutes(t[1])
+    const late = d.valueOf()
+    if(late > Date.now()) {
+      return
+    }
+    setShowFeedingLate(false);
+    feed(amount, feedingEvents?.[0]?.time, setFeedingEvents, late);
     catVoiceAlert('yummy')
   }
 
@@ -340,7 +355,7 @@ function App() {
             <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
             <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
             <NavOption icon={'Food'} title={'Snack'} action={()=>{feedAmount(0.1)}} className='FeedSnack' />
-            {showFeedingList && <NavOption icon={'Time'} title={'Late'} />}
+            {showFeedingList && <NavOption icon={'Time'} title={'Late'} action={()=>{setShowFeedingLate(true)}}/>}
           </NavSet>
         </NavBar>
         <ItemList items={feedingEvents}
@@ -386,6 +401,27 @@ function App() {
         <NetworkPicker networks={networks} onRefresh={()=>{
           networkFetch();
         }} /> 
+      </PopUp>
+      
+      <PopUp className="FeedLate" trigger={showFeedingLate} onExit={()=>{setShowFeedingLate(false)}}>
+        <h1>When?</h1>
+        <form onSubmit={(e)=>{
+          e.preventDefault()
+        }}>
+          <button onClick={()=>{feedAmountLate(1)}}>
+            <img className='Icon SVG Food'/>
+            Full
+          </button>
+          <button onClick={()=>{feedAmountLate(0.5)}} className='FeedHalf'>
+            <img className='Icon SVG Food'/>
+            Half
+          </button>
+          <button onClick={()=>{feedAmountLate(0.1)}} className='FeedSnack'>
+            <img className='Icon SVG Food'/>
+            Snack
+          </button>
+          <input ref={feedLateRef} type="time" id="appt" name="appt" defaultValue="12:00" />
+        </form>
       </PopUp>
 
       <PopUp noControl trigger={updateInProgress}>
