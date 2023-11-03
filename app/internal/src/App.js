@@ -63,7 +63,7 @@ function App() {
 
   const feedAmount = (amount)=>{
     feed(amount, feedingEvents?.[0]?.time, setFeedingEvents)
-    catVoiceAlert('yummy')
+    // catVoiceAlert('yummy')
   }
   const feedAmountLate = (amount)=>{
     const t = feedLateRef.current.value.split(':');
@@ -76,7 +76,7 @@ function App() {
     }
     setShowFeedingLate(false);
     feed(amount, feedingEvents?.[0]?.time, setFeedingEvents, late);
-    catVoiceAlert('yummy')
+    // catVoiceAlert('that was yummy')
   }
 
 
@@ -210,7 +210,7 @@ function App() {
   if(!appStart){
     return <div className='App Intro'>
       <header onClick={()=>{
-        if(!inDev) catVoiceAlert('meow, Hello Miki!');
+        if(!inDev) catVoiceAlert('meow, Hello Meekee!');
         setAppStart(true);
       }}>
         <p className='Logo'>😻</p>
