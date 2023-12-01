@@ -1,5 +1,6 @@
 .App {
   --ctheme-dark: rgb(0, 0, 0);
+  --ctheme-100: rgb(187, 223, 201);
   --ctheme: rgb(120, 189, 144);
   --ctheme-light: rgb(147, 218, 189);
   --ctheme-high: rgb(217, 255, 209);

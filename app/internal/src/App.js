@@ -26,7 +26,6 @@ function App() {
   const search = new URLSearchParams(window.location.search);
   const [appStart, setAppStart] = useState(search.get('postupdate') === 'app');
   const [updateInProgress, setUpdateInProgress] = useState();
-  const appRef = useRef();
 
   const [showNetwork, setShowNetwork] = useState(false)
   const [networks, setNetworks] = useState([]);
@@ -100,7 +99,7 @@ function App() {
 
     if(event.type === 'sensor'){
       //voice alert if motion sensor event
-      if(event.now === 1){
+      if(event.now === 1 && sensorsArmed){
         catVoiceAlert(sensorMessage)
       }
       //save to log (localstorage)
@@ -147,7 +146,7 @@ function App() {
       setServerTime(Date.now());
     }
 
-    if(sensorsArmed){
+    // if(sensorsArmed){
       const doConnection = ()=>{
         // console.log(liveWS.current?.readyState)
         if(!liveWS.current || liveWS.current?.readyState === WebSocket.CLOSED) openWS()
@@ -157,12 +156,12 @@ function App() {
       if(!isApiEmulate()){
         liveWDT.current = setInterval(()=>{
           doConnection()
-        },5000)
+        },60000)
         doConnection()
       }
       else
         console.log("emulated api, no WS")
-    }
+    // }
 
     return ()=>{
       if(liveWS.current?.readyState === WebSocket.OPEN){
@@ -172,7 +171,7 @@ function App() {
 
       clearInterval(liveWDT?.current)
     }
-  },[sensorsArmed])
+  },[])
 
   
   const networkFetch = ()=>{
@@ -232,7 +231,7 @@ function App() {
   }
 
   return (
-    <div className="App" ref={appRef}>
+    <div className="App">
       <header className="Title" onClick={()=>{setShowNav(n=>!n)}}>
         <div className='Text'>
         <h1>Hello Miki</h1>
@@ -261,13 +260,9 @@ function App() {
             localStorageClearEvents('motion')
           }}/>
           
-          {/* <NavOption icon={'Cog'} title="Fullscreen" action={()=>{
-              appRef.current.requestFullscreen()
-          }} />  */}
           <NavOption icon={'Hear'} title="Test Speaker" action={()=>{
             catVoiceAlert('meow')
           }}/>
-          {/* <NavOption toSection="time" icon={'Time'} title="Time" /> */}
           <NavOption title={'Update Panel'} action={()=>{
             document.location.href = `http://${document.location.hostname}/device?appVersion=${process.env.REACT_APP_VERSION}`;
           }}/>
@@ -307,7 +302,7 @@ function App() {
             setSensorsArmed(s=>!s)
           }}>
             <img className={'Icon SVG Power'} />
-            Arm
+            Mute
           </button>
           {isApiEmulate() && <button onClick={()=>{
             const ev = {data: JSON.stringify(requestMockEvent())};
@@ -317,6 +312,7 @@ function App() {
             Trigger Sensor  
           </button>}
         </div> 
+
         <ItemList items={monitorEvents}
         Template={({item, className, isPreview})=> 
         <div className={'EventItemContent ' + className}>
@@ -347,20 +343,24 @@ function App() {
       
 
       {showFeeding && <>
-      <hr />
+  
       <section className='List Food' >
         {/* <h1>Food</h1>  */}
         <NavBar>
           <NavSet>
-            <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
-            <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
-            <NavOption icon={'Food'} title={'Snack'} action={()=>{feedAmount(0.1)}} className='FeedSnack' />
-            {showFeedingList && <NavOption icon={'Time'} title={'Late'} action={()=>{setShowFeedingLate(true)}}/>}
+            {showFeedingList ?
+              <NavOption icon={'Time'} title={'Late'} action={()=>{setShowFeedingLate(true)}}/>
+            : 
+            <>
+              <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
+              <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
+              <NavOption icon={'Food'} title={'Snack'} action={()=>{feedAmount(0.1)}} className='FeedSnack' />
+            </>}
           </NavSet>
         </NavBar>
+
         <ItemList items={feedingEvents}
-        shouldShow={showFeedingList}
-        onClick={()=>{setShowFeedingList(s=>!s)}}
+        onClickShow={(willShow)=>{setShowFeedingList(willShow)}}
         Template={({item, className, isPreview})=>
           <li className={'FeedItemContent ' 
           + className 
@@ -380,7 +380,7 @@ function App() {
               </>
               :
               <>
-                <p className='EventTimeDelta'>{lastFeedTimeDiff + ' ago'}</p>
+                <p className='EventTimeDelta'>{lastFeedTimeDiff}</p>
                 <p className='EventTimeSub'>{item.timeHuman}</p>
               </>}
             </div>
@@ -395,8 +395,6 @@ function App() {
       </section>
       </>}
         
-      <hr />
-
       <PopUp onExit={()=>{setShowNetwork(false)}} trigger={showNetwork}>
         <NetworkPicker networks={networks} onRefresh={()=>{
           networkFetch();

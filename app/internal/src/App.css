@@ -1,3 +1,4 @@
+
 .App {
   font-size: calc(10px + 4vmin);
   display: flex;
@@ -12,17 +13,18 @@
 }
 
 .App.Intro {
-  background-color: var(--ctheme-high);
+  /* background-color: var(--ctheme-100); */
   display: grid;
   place-items: center;
 }
 .App.Intro header {
-  color: white;
+  /* color: white; */
   display: flex;
+  border-radius: 1rem;
   
-  background-color: var(--ctheme);
+  background-color: var(--ctheme-high);
+  border: solid lightgray 2px;
   padding: 3rem;
-  filter: drop-shadow(0 0 10px gray);
 }
 .App.Intro .Logo{
   font-size: 12rem;
@@ -62,10 +64,10 @@ button, input{
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 0.45rem; 
-  border: solid var(--ctheme-dark) 4px;
-  color:var(--ctheme-dark);
-  background-color: var(--ctheme);
+  border-radius: 1rem; 
+  border: solid lightgray 2px;
+  color: black;
+  background-color: rgb(213, 232, 187);
   padding: 1rem;
   padding-block: 0.25rem;
   margin: 0.25rem;
@@ -74,8 +76,7 @@ button, input{
   transition: all 0.25s;
 }
 button:hover {
-  background-color: var(--ctheme-high);
-  color: var(--ctheme-dark);
+  filter: brightness(0.8);
 }
 
 .Card {
@@ -86,8 +87,8 @@ button:hover {
 
 
 .Title {
-  background-color: var(--ctheme-high);
-  color: var(--ctheme-dark);
+  background-color: hsl(103, 89%, 93%);
+  color: hsl(103, 64%, 20%);
   padding: 0 2rem;
   display: grid;
   grid-template-areas: "logo text";
@@ -95,11 +96,15 @@ button:hover {
   align-items: center;
   gap:1rem;
   line-height: 0.75;
+  border: solid lightgray 2px;
+  border-radius: 1rem;
+  margin: 0.5rem;
 }
 .Title .Logo{
   grid-area: logo;
   display: inline-block;
   font-size: min(20vw,10rem);
+  filter: drop-shadow(0 0 4px white);
 }
 .Title .Text {
   text-align: end;
@@ -155,10 +160,9 @@ button:hover {
 .List .ItemList {
   padding: 1rem;
   border-radius: 1rem;
-  background-color: var(--ctheme-high);
 }
 .High.Item {
-  border: solid var(--ctheme-dark) 2px;
+  border: solid lightgray 2px;
 }
 
 .FeedHalf .Icon {
@@ -185,7 +189,7 @@ button:hover {
 }
 
 .EventBanner {
-  background-color: var(--ctheme-high);
+  background-color: white;
   border-radius: 1rem;
   padding: 0.25rem 1rem;
   display: flex;
@@ -216,12 +220,7 @@ button:hover {
   font-size: 4rem;
 }
 
-.List.Monitor {
-  filter: hue-rotate(-90deg);
-}
-.List.Food {
-  filter: hue-rotate(50deg);
-}
+
 
 .FeedLate * {
   /* margin: 1rem; */
@@ -237,4 +236,29 @@ button:hover {
 .FeedLate input[type='time']{
   grid-area: dt;
   font-size: 4rem;
+}
+
+
+.List.Monitor {
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: hsl(289, 65%, 97%);
+}
+.List.Monitor button{
+  background-color: hsl(283, 64%, 91%);
+}
+.List.Monitor .Item{
+  background-color: hsl(297, 49%, 83%);
+}
+
+.List.Food {
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: hsl(204, 83%, 98%);
+}
+.List.Food.List.Food button {
+  background-color: hsl(240, 75%, 94%);
+}
+.List.Food .Item{
+  background-color: hsl(223, 68%, 86%);
 }
