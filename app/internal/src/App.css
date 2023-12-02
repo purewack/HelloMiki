@@ -172,8 +172,8 @@ button:hover {
   mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 10%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 100%);
 }
 
-.Disarm .Icon{
-  opacity: 0.2;
+.Disarm {
+  opacity: 0.4;
 }
 
 
@@ -242,13 +242,13 @@ button:hover {
 .List.Monitor {
   padding: 1rem;
   border-radius: 1rem;
-  background-color: hsl(289, 65%, 97%);
+  background-color: hsl(54, 63%, 97%);
 }
 .List.Monitor button{
-  background-color: hsl(283, 64%, 91%);
+  background-color: hsl(58, 65%, 91%);
 }
 .List.Monitor .Item{
-  background-color: hsl(297, 49%, 83%);
+  background-color: hsl(52, 49%, 83%);
 }
 
 .List.Food {

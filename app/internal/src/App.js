@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getNetworkList, getNetworkState, getServerUptime, setServerTime, isApiEmulate, requestMockEvent } from './REST';
 import {localStorageGetEvents, feed, motion, localStorageClearEvents, localStorageDeleteEvent} from './Helpers'
 
@@ -92,14 +92,15 @@ function App() {
   const liveWS = useRef()
   const liveWDT = useRef()
   
-  const onWSMessage = (ev)=>{
+  const onWSMessage = useCallback((ev)=>{
+    if(!ev) return
     console.log(ev.data)
     const event = JSON.parse(ev.data)
 
     if(event.type === 'sensor'){
       //voice alert if motion sensor event
-      if(event.now === 1 && sensorsArmed){
-        catVoiceAlert(sensorMessage)
+      if(event.now === 1){
+        if(sensorsArmed) catVoiceAlert(sensorMessage)
       }
       //save to log (localstorage)
       motion({now:event.now}, monitorEvents?.[0]?.time, setMonitorEvents)
@@ -112,8 +113,8 @@ function App() {
       setUpdateInProgress(null);
       console.log('Post-update app build upload, should refresh')
       window.location.search = 'postupdate=app';
-    }
-  }
+    }  
+  },[sensorMessage, sensorsArmed])
 
   useEffect(()=>{
 
@@ -137,7 +138,6 @@ function App() {
       if(st === WebSocket.OPEN 
       || st === WebSocket.CONNECTING ) return
       const ws = new WebSocket(`ws://${address}/ws/monitor`);
-      ws.onmessage = onWSMessage;
       ws.onerror   = onWSError;
       ws.onclose   = onWSClose;
       ws.onopen    = onWSOpen;
@@ -170,8 +170,14 @@ function App() {
 
       clearInterval(liveWDT?.current)
     }
-  },[sensorsArmed])
+  },[])
 
+  useEffect(()=>{
+    if(onWSMessage && liveWS?.current){
+      console.log('new arm state', sensorsArmed)
+      liveWS.current.onmessage = onWSMessage;
+    }
+  },[onWSMessage])
   
   const networkFetch = ()=>{
     setNetworks([
@@ -292,8 +298,8 @@ function App() {
       </>}
       
       
-      <section className={'List Monitor '} >
-        <div className={'LiveStatus ' + (sensorsArmed ? 'Arm' : 'Disarm')}>
+      <section className={'List Monitor ' + (sensorsArmed ? 'Arm' : 'Disarm')} >
+        <div className={'LiveStatus '}>
           {/* <div className='Locations'>
             <img alt=""  className='Icon SVG Road'/>
             <img alt=""  className='Icon SVG Garden'/>
@@ -301,14 +307,14 @@ function App() {
           <button onClick={()=>{
             setSensorsArmed(s=>!s)
           }}>
-            <img className={'Icon SVG Power'} />
+            <img alt='power' className={'Icon SVG Power'} />
             Mute
           </button>
           {isApiEmulate() && <button onClick={()=>{
             const ev = {data: JSON.stringify(requestMockEvent())};
             onWSMessage(ev)
           }}>
-            <img className='Icon SVG CatBlocky'/>
+            <img alt='cat' className='Icon SVG CatBlocky'/>
             Trigger Sensor  
           </button>}
         </div> 
@@ -371,7 +377,7 @@ function App() {
               <button onClick={(ev)=>{
                 ev.stopPropagation()
                 localStorageDeleteEvent('feed', 'feed'+item.time, setFeedingEvents)
-              }}><img className='Icon SVG Bin'/></button>
+              }}><img alt='bin' className='Icon SVG Bin'/></button>
             </div>}
             <div className={'EventTimeBanner'}>
               {isPreview ? <>
@@ -407,15 +413,15 @@ function App() {
           e.preventDefault()
         }}>
           <button onClick={()=>{feedAmountLate(1)}}>
-            <img className='Icon SVG Food'/>
+            <img alt='food' className='Icon SVG Food'/>
             Full
           </button>
           <button onClick={()=>{feedAmountLate(0.5)}} className='FeedHalf'>
-            <img className='Icon SVG Food'/>
+            <img alt='food' className='Icon SVG Food'/>
             Half
           </button>
           <button onClick={()=>{feedAmountLate(0.1)}} className='FeedSnack'>
-            <img className='Icon SVG Food'/>
+            <img alt='food' className='Icon SVG Food'/>
             Snack
           </button>
           <input ref={feedLateRef} type="time" id="appt" name="appt" defaultValue="12:00" />
