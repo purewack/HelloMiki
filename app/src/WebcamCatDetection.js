@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as tf from '@tensorflow/tfjs';
+import { LogIn } from './Firebase';
 
 export default function WebcamCatDetection(){
   const videoRef = useRef(null);
@@ -79,6 +80,12 @@ export default function WebcamCatDetection(){
   }, []); // Empty dependency array means this effect runs once when the component mounts
 
   return (<>
+    <button onClick={()=>{
+      LogIn();
+    }}>Log In</button>
+    <button onClick={()=>{
+
+    }}>Report</button>
     <p>{ready ? 'Done' : '...Loading'}</p>
     <div style={{display: 'grid', gridTemplateArea: 'sense'}}>
       <video ref={videoRef} style={{gridArea: "sense"}} id="webcam" width="640" height="480" autoPlay></video>
