@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState } from 'react';
+import {useEffect, useMemo, useRef, useState } from 'react';
 import { getNetworkList, getNetworkState, getServerUptime, setServerTime, isApiEmulate, requestMockEvent } from './REST';
 import {localStorageGetEvents, feed, motion, localStorageClearEvents, localStorageDeleteEvent} from './Helpers'
 
@@ -90,7 +90,6 @@ function App() {
   
   //WebSockets for live monitor events
   const liveWS = useRef()
-  const [liveUptime, setLiveUptime] = useState(null)
   const liveWDT = useRef()
   
   const onWSMessage = (ev)=>{
@@ -171,7 +170,7 @@ function App() {
 
       clearInterval(liveWDT?.current)
     }
-  },[])
+  },[sensorsArmed])
 
   
   const networkFetch = ()=>{
@@ -215,6 +214,7 @@ function App() {
         <p className='Logo'>😻</p>
         <h1>Hello Miki!</h1>
       </header>
+      <h6>{process.env.REACT_APP_VERSION}</h6>
       {inDev &&
         <div style={{
           padding: '1rem',
