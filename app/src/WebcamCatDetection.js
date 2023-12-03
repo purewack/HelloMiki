@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as tf from '@tensorflow/tfjs';
-import { LogIn } from './Firebase';
+import { logInGoogle } from './Firebase';
 
 export default function WebcamCatDetection(){
   const videoRef = useRef(null);
@@ -81,7 +81,7 @@ export default function WebcamCatDetection(){
 
   return (<>
     <button onClick={()=>{
-      LogIn();
+      logInGoogle();
     }}>Log In</button>
     <button onClick={()=>{
 
