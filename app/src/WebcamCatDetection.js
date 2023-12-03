@@ -2,14 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as tf from '@tensorflow/tfjs';
 import { logInGoogle } from './Firebase';
+import WebcamSelector from './WebcamSelector';
 
 export default function WebcamCatDetection(){
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
+  const [webcamID, setWebcamID] = useState(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
+    if(!webcamID) return;
+    setReady(false);
     const initWebcam = async () => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -23,7 +27,7 @@ export default function WebcamCatDetection(){
 
       // Access webcam stream
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: webcamID} });
         video.srcObject = stream;
         setReady(true);
       } catch (error) {
@@ -59,7 +63,7 @@ export default function WebcamCatDetection(){
             ctx.lineWidth = 2;
             ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
           });
-        }, 100); // Adjust the interval based on your preference
+        }, 200); // Adjust the interval based on your preference
       });
     };
 
@@ -77,19 +81,25 @@ export default function WebcamCatDetection(){
     };
 
     initWebcam();
-  }, []); // Empty dependency array means this effect runs once when the component mounts
+  }, [webcamID]); 
 
-  return (<>
-    <button onClick={()=>{
-      logInGoogle();
-    }}>Log In</button>
-    <button onClick={()=>{
-
-    }}>Report</button>
-    <p>{ready ? 'Done' : '...Loading'}</p>
-    <div style={{display: 'grid', gridTemplateArea: 'sense'}}>
-      <video ref={videoRef} style={{gridArea: "sense"}} id="webcam" width="640" height="480" autoPlay></video>
-      <canvas ref={canvasRef} style={{gridArea: "sense", border: "solid red 1px"}} id="outputCanvas" width="640" height="480"></canvas>
-    </div>
-  </>);
-}
+  return ( !webcamID ? <>
+      <WebcamSelector onSelect={(camera)=>{
+        console.log(camera)
+        setWebcamID(camera.deviceId)
+      }}/> 
+    </>
+    :
+    <>
+      {!ready && "waiting for video..."}
+      {ready && <button onClick={async ()=>{
+        setReady(false);
+        setWebcamID(null);
+      }}>Back</button>}
+      <div style={{display: 'grid', gridTemplateArea: 'sense'}}>
+        <video ref={videoRef} style={{gridArea: "sense"}} id="webcam" width="640" height="480" autoPlay></video>
+        <canvas ref={canvasRef} style={{gridArea: "sense", border: "solid red 1px"}} id="outputCanvas" width="640" height="480"></canvas>
+      </div>
+    </>
+  );
+} 

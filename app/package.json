@@ -43,6 +43,7 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "mock-socket": "^9.3.0"
   }
 }
