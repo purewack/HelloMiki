@@ -62,3 +62,6 @@ export function feed(amount, last = undefined, setter, atTime = undefined){
 export function motion(event, last = undefined, setter, atTime = undefined){
   setEventAuto('motion',last,{event},setter, atTime)
 }
+export function arm(event, last = undefined, setter, atTime = undefined){
+  setEventAuto('arm',last,{event},setter, atTime)
+}

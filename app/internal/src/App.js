@@ -1,14 +1,15 @@
 import {useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getNetworkList, getNetworkState, getServerUptime, setServerTime, isApiEmulate, requestMockEvent } from './REST';
-import {localStorageGetEvents, feed, motion, localStorageClearEvents, localStorageDeleteEvent} from './Helpers'
+import {localStorageGetEvents, feed, motion, localStorageClearEvents, localStorageDeleteEvent, arm} from './Helpers'
 
 import './App.css';
 import './Theme.css'
 import './Res/svg.css'
-import NetworkPicker from './Components/NetworkPicker/index';
+import NetworkPicker from './Components/NetworkPicker';
 import { NavBar, NavOption, NavSet } from './Components/NavBar';
-import ItemList from './Components/ItemList/index';
+import ItemList from './Components/ItemList';
 import PopUp from './Components/PopUp';
+import Timeline from './Components/Timeline';
 
 const inDev = process.env.NODE_ENV === 'development'
 
@@ -23,6 +24,9 @@ if(!address) address = window.location.hostname
 
 
 function App() {
+  const [shouldProductionView, setShouldProductionView] = useState(inDev)
+  const productionMode = isApiEmulate() && !shouldProductionView;
+
   const search = new URLSearchParams(window.location.search);
   const [appStart, setAppStart] = useState(search.get('postupdate') === 'app');
   const [updateInProgress, setUpdateInProgress] = useState();
@@ -38,12 +42,14 @@ function App() {
   const feedLateRef = useRef();
   
   //feeding time difference since last one
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [lastFeedTimeDiff, setLastFeedTimeDiff] = useState();
   const timeDiffTimer = useRef();
   useEffect(()=>{
     if(feedingEvents[0]?.time){
       const newTime = ()=>{
         const now = new Date();
+        setCurrentTime(now);
         const dt = new Date(now - feedingEvents[0].time);
         const diff = dt.getHours()-1 + 'h ' + dt.getMinutes() + 'min'
         // console.log(diff, dt, now)
@@ -87,7 +93,26 @@ function App() {
   const [sensorMessage, setSensorMessage] = useState('Meow Meow');
   const [sensorsArmed, setSensorsArmed] = useState(true);
   const [liveStatus, setLiveStatus] = useState('wait');
+  // const [sensorsArmedEvents, setSensorsArmedEvents] = useState([])
   
+  // useEffect(()=>{ 
+  //   arm({armed:sensorsArmed},undefined,setSensorsArmedEvents);
+  // },[sensorsArmed]);
+
+  // useEffect(()=>{
+  //   const date = new Date(currentTime);
+  //   if(date.getHours() === 0 && date.getMinutes()<5) {
+  //     localStorageClearEvents('arm');
+  //     arm({armed:sensorsArmed},undefined,setSensorsArmedEvents);
+  //   }
+  // },[currentTime,sensorsArmed])
+
+  useEffect(()=>{
+    // localStorageGetEvents('arm',setSensorsArmedEvents);
+    localStorageGetEvents('motion',setMonitorEvents)
+  },[])
+
+
   //WebSockets for live monitor events
   const liveWS = useRef()
   const liveWDT = useRef()
@@ -218,16 +243,20 @@ function App() {
         setAppStart(true);
       }}>
         <p className='Logo'>😻</p>
+        <div>
         <h1>Hello Miki!</h1>
+        <i>Click to open monitor</i>
+        </div>
       </header>
       <h6>{process.env.REACT_APP_VERSION}</h6>
       {inDev &&
         <div style={{
           padding: '1rem',
           margin: '1rem',
+          border: 'solid lightgray 1px',
           borderRadius: '1rem',
-          background: 'lightblue',
-          color: 'blue'
+          background: 'honeydew',
+          color: 'lightblue'
         }}>
           <h2><i>DEV BUILD</i></h2>
           <h3>{process.env?.REACT_APP_HW_SERVER_IP ? process.env?.REACT_APP_HW_SERVER_IP : 'Emulated API'}</h3>
@@ -282,6 +311,10 @@ function App() {
               const ev = {data: JSON.stringify({type:'update',where:'ota'})};
               onWSMessage(ev)
             }}/>
+            
+            <NavOption icon={'Power'} title="Toggle Production View" action={()=>{
+              setShouldProductionView(s => !s);
+            }}/>
           </>}
         </NavSet>
 
@@ -300,51 +333,74 @@ function App() {
       
       <section className={'List Monitor ' + (sensorsArmed ? 'Arm' : 'Disarm')} >
         <div className={'LiveStatus '}>
-          {/* <div className='Locations'>
-            <img alt=""  className='Icon SVG Road'/>
-            <img alt=""  className='Icon SVG Garden'/>
-          </div> */}
-          <button onClick={()=>{
-            setSensorsArmed(s=>!s)
-          }}>
-            <img alt='power' className={'Icon SVG Power'} />
-            Mute
-          </button>
-          {isApiEmulate() && <button onClick={()=>{
+          
+          <Timeline className={'Card MotionTimeline'} 
+            nowTime={currentTime}
+            timestamps={monitorEvents.map(e => e.time)} 
+            // armTimestamps={sensorsArmedEvents.map(e => e.time)}
+            // timestamps={[1702531585000, 1702538785000, 1702556785000, 1702558705000, 1702559425000, 1702584625000, 1702591225000, 1702593924336]}
+            // armTimestamps={[1702548025000, 1702556425000, 1702579225000, 1702593625000]}
+            // initialArmState={monitorEvents?.[0]?.armed}
+            
+          />
+          
+          
+          {!productionMode && <button onClick={()=>{
             const ev = {data: JSON.stringify(requestMockEvent())};
             onWSMessage(ev)
           }}>
             <img alt='cat' className='Icon SVG CatBlocky'/>
             Trigger Sensor  
           </button>}
+          
         </div> 
 
         <ItemList items={monitorEvents}
-        Template={({item, className, isPreview})=> 
-        <div className={'EventItemContent ' + className}>
-          <div className='EventTimeBanner'>
-            <p className='EventTime'>{item.timeHuman}</p>
-            <p className='EventDay'>{item.dateHuman}</p>
-          </div>
-          <div className='EventBanner'>{item.now === 1 && item.prev === 2 ? 
-          <>
-            <img alt=""  className='Icon SVG Road'/>
-            <img alt=""  className={'Icon SVG BackArrow RotateFlip'}/>
-            <img alt=""  className='Icon SVG Garden'/>
-          </>
-          : item.now === 2 && item.prev === 1 ? 
-          <>
-            <img alt=""  className='Icon SVG Road'/>
-            <img alt=""  className={'Icon SVG BackArrow'}/>
-            <img alt=""  className='Icon SVG Garden'/>
-          </> 
-          :
-          <>
-            <img alt=""  className={'Icon SVG House'}/>
-            <img alt=""  className='Icon SVG Time'/>
-          </>
-          }</div>
-        </div>}/>
+        Template={({item, className, isPreview, index})=>
+          <div className={'EventItemContent ' + className }>
+              <div className='EventTimeBanner'>
+                {monitorEvents?.length ? <>
+                <p className='EventTime'>{item.timeHuman}</p>
+                <p className='EventDay'>{item.dateHuman}</p>
+                </>
+                :
+                <p>Nothing to show yet</p>
+                }
+              </div> 
+
+              {(index === 0 && !isPreview) ? 
+
+              <button onClick={()=>{
+                setSensorsArmed(s=>!s)
+              }}>
+                <img alt='power' className={'Icon SVG Power'} />
+                Mute
+              </button> 
+              
+              : 
+
+              <div className='EventBanner'>{item.now === 1 && item.prev === 2 ? 
+                <>
+                  <img alt=""  className='Icon SVG Road'/>
+                  <img alt=""  className={'Icon SVG BackArrow RotateFlip'}/>
+                  <img alt=""  className='Icon SVG Garden'/>
+                </>
+                : item.now === 2 && item.prev === 1 ? 
+                <>
+                  <img alt=""  className='Icon SVG Road'/>
+                  <img alt=""  className={'Icon SVG BackArrow'}/>
+                  <img alt=""  className='Icon SVG Garden'/>
+                </> 
+                :
+                <>
+                  <img alt=""  className={'Icon SVG House'}/>
+                  <img alt=""  className='Icon SVG Time'/>
+                </>}
+              </div>
+              }
+          </div> 
+        }/>
+
       </section>
       
 
@@ -352,16 +408,13 @@ function App() {
   
       <section className='List Food' >
         {/* <h1>Food</h1>  */}
-        <NavBar>
+
+        <NavBar className='Controls'>
           <NavSet>
-            {showFeedingList ?
               <NavOption icon={'Time'} title={'Late'} action={()=>{setShowFeedingLate(true)}}/>
-            : 
-            <>
-              <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
-              <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
               <NavOption icon={'Food'} title={'Snack'} action={()=>{feedAmount(0.1)}} className='FeedSnack' />
-            </>}
+              <NavOption icon={'Food'} title={'1/2'} action={()=>{feedAmount(0.5)}} className='FeedHalf' />
+              <NavOption icon={'Food'} title={'1'}   action={()=>{feedAmount(1)}}/>
           </NavSet>
         </NavBar>
 
@@ -398,6 +451,13 @@ function App() {
           </li>
         }  
         />
+
+        <Timeline className={'Card FeedingTimeline'} 
+          nowTime={currentTime}
+          timestamps={feedingEvents.map(e => e.time)} 
+        />
+        
+
       </section>
       </>}
         

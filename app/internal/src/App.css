@@ -14,8 +14,13 @@
 
 .App.Intro {
   /* background-color: var(--ctheme-100); */
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.App.Intro > * {
+  margin: 0;
 }
 .App.Intro header {
   /* color: white; */
@@ -35,6 +40,19 @@
   font-size: 3rem;
   padding: 0;
   margin: 0.5rem;
+}
+.App.Intro h1 {
+  margin:0;
+  padding: 0;
+}
+.App.Intro header > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+.App.Intro header > div > i {
+  font-size: 0.7em;
 }
 
 .Icon {
@@ -81,6 +99,7 @@ button:hover {
 
 .Card {
   /* background-color: var(--ctheme-light); */
+  border: solid lightgray 2px;
   border-radius: 0.45rem; 
   padding: 0.35rem;
 }
@@ -147,14 +166,12 @@ button:hover {
 }
 
 
-.ItemList{
-  width: 100%;
-}
+
 .List{
   margin: 1rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   gap:1rem;
 }
 .List .ItemList {
@@ -220,12 +237,12 @@ button:hover {
   font-size: 4rem;
 }
 
-
-
-.FeedLate * {
-  /* margin: 1rem; */
-  /* font-size: 3rem; */
+.MotionTimeline {
+  background-color: white;
+  padding: 0;
+  filter: hue-rotate(-40deg);
 }
+
 
 .FeedLate form {
   display: grid;
@@ -261,4 +278,20 @@ button:hover {
 }
 .List.Food .Item{
   background-color: hsl(223, 68%, 86%);
+}
+
+.List.Food .Controls .NavSet{
+  flex-wrap: nowrap;
+}
+.List.Food .Controls {
+  font-size: 1rem;
+}
+.List.Food .Controls img {
+  height: 15vmin;
+}
+
+.FeedingTimeline {
+  background-color: white;
+  padding: 0;
+  filter: hue-rotate(120deg);
 }
