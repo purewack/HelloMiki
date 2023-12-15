@@ -1,8 +1,9 @@
 import {useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getNetworkList, getNetworkState, getServerUptime, setServerTime, isApiEmulate, requestMockEvent } from './REST';
-import {localStorageGetEvents, feed, motion, localStorageClearEvents, localStorageDeleteEvent, arm} from './Helpers'
+import {localStorageGetEvents, feed, motion, localStorageClearEvents, localStorageDeleteEvent, arm, timestampToMinutesSinceMidnight, isDaytime} from './Helpers'
 
 import './App.css';
+import './App.Dark.css';
 import './Theme.css'
 import './Res/svg.css'
 import NetworkPicker from './Components/NetworkPicker';
@@ -11,7 +12,7 @@ import ItemList from './Components/ItemList';
 import PopUp from './Components/PopUp';
 import Timeline from './Components/Timeline';
 
-const inDev = process.env.NODE_ENV === 'development'
+const inDev = process.env?.NODE_ENV === 'development'
 
 const catVoiceAlert = (text)=>{
   let msg = new SpeechSynthesisUtterance();
@@ -25,7 +26,7 @@ if(!address) address = window.location.hostname
 
 function App() {
   const [shouldProductionView, setShouldProductionView] = useState(inDev)
-  const productionMode = isApiEmulate() && !shouldProductionView;
+  const productionMode = isApiEmulate() && !shouldProductionView ;
 
   const search = new URLSearchParams(window.location.search);
   const [appStart, setAppStart] = useState(search.get('postupdate') === 'app');
@@ -42,21 +43,21 @@ function App() {
   const feedLateRef = useRef();
   
   //feeding time difference since last one
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const [lastFeedTimeDiff, setLastFeedTimeDiff] = useState();
   const timeDiffTimer = useRef();
   useEffect(()=>{
     if(feedingEvents[0]?.time){
       const newTime = ()=>{
         const now = new Date();
-        setCurrentTime(now);
+        setCurrentTime(Date.now());
         const dt = new Date(now - feedingEvents[0].time);
         const diff = dt.getHours()-1 + 'h ' + dt.getMinutes() + 'min'
         // console.log(diff, dt, now)
         setLastFeedTimeDiff(diff)
       }
       newTime()
-      timeDiffTimer.current = setInterval(newTime,1000 * 60)
+      timeDiffTimer.current = setInterval(newTime,1000 * 60 )
     }
     else
       setLastFeedTimeDiff(null)
@@ -236,8 +237,23 @@ function App() {
 
   const [showNav, setShowNav] = useState(false)
 
+  const [darkModeTimed, setDarkModeTimed] = useState(false);
+  const [darkModeForced, setDarkModeForced] = useState(JSON.parse(localStorage.getItem('darkMode')));
+  useEffect(()=>{
+    localStorage.setItem('darkMode', darkModeForced ? 'true':'false')
+  },[darkModeForced])
+  useEffect(()=>{
+    const daytime = isDaytime(currentTime);
+    setDarkModeTimed(d => !daytime);
+  },[currentTime, setDarkModeTimed])
+  const darkClass = (darkModeTimed || darkModeForced ? ' Dark ' : '');
+
+  useEffect(()=>{
+    console.log('NIGHT' ,darkModeTimed)
+  },[darkModeTimed])
+
   if(!appStart){
-    return <div className='App Intro'>
+    return <div className={'App Intro ' + darkClass}>
       <header onClick={()=>{
         if(!inDev) catVoiceAlert('meow, Hello Meekee!');
         setAppStart(true);
@@ -266,7 +282,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className={"App " + darkClass}>
       <header className="Title" onClick={()=>{setShowNav(n=>!n)}}>
         <div className='Text'>
         <h1>Hello Miki</h1>
@@ -295,13 +311,17 @@ function App() {
             localStorageClearEvents('motion')
           }}/>
           
+          <NavOption icon={'Power'} title={darkModeForced ? "Dark Mode: On" : "Dark Mode: Auto"} action={()=>{
+            setDarkModeForced(d => !d);
+          }}/>
+
           <NavOption icon={'Hear'} title="Test Speaker" action={()=>{
             catVoiceAlert('meow')
           }}/>
           <NavOption title={'Update Panel'} action={()=>{
             document.location.href = `http://${document.location.hostname}/device?appVersion=${process.env.REACT_APP_VERSION}`;
           }}/>
-
+          
           {inDev && <>
             <NavOption title='postupdate' action={()=>{
               const ev = {data: JSON.stringify({type:'refresh',where:'app_page'})};
@@ -345,7 +365,7 @@ function App() {
           />
           
           
-          {!productionMode && <button onClick={()=>{
+          {inDev && !productionMode && <button onClick={()=>{
             const ev = {data: JSON.stringify(requestMockEvent())};
             onWSMessage(ev)
           }}>
