@@ -1,0 +1,62 @@
+
+.App.Dark {
+  background-color:black;
+  color: var(ivory);
+}
+
+.App.Dark.Intro header {
+  background-color: midnightblue;
+  color: ivory;
+}
+
+.App.Dark button, .App.Dark input{
+  background-color: rgb(34, 36, 31);
+}
+.App.Dark .NavOption.Action button {
+  background-color: rgb(240, 217, 243);
+  filter: invert(1);
+}
+
+.App.Dark .Title {
+  background-color: hsl(100, 14%, 13%);
+  color: hsl(103, 60%, 88%);
+}
+
+.App.Dark .MotionTimeline {
+  filter: hue-rotate(80deg) invert(1);
+}
+
+.App.Dark .List.List {
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: hsl(180, 2%, 9%);
+}
+.App.Dark .List.List button{
+  color: black;
+  background-color: white;
+  filter: invert(0.95);
+}
+.App.Dark .Item.Item{
+  color: ivory;
+  background-color: hsl(0, 0%, 0%);
+}
+.App.Dark .EventBanner {
+  filter: invert(0.95);
+}
+/* 
+.App.Dark .List.Food {
+  background-color: hsl(180, 2%, 9%);
+}
+.App.Dark .List.Food.List.Food button {
+  color: black;
+  background-color: white;
+  filter: invert(1);
+}
+.App.Dark .List.Food .Item{
+  color: ivory;
+  background-color: hsl(240, 2%, 8%);
+} */
+
+.App.Dark .FeedingTimeline {
+  filter: hue-rotate(-120deg) invert(1);
+}
