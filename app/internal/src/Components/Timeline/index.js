@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useState } from "react";
+import React, { useRef, useLayoutEffect, useState, Fragment } from "react";
 
 const Timeline = ({ nowTime = 1, timestamps, armTimestamps, initialArmState=false, className }) => {
 
@@ -36,46 +36,46 @@ const Timeline = ({ nowTime = 1, timestamps, armTimestamps, initialArmState=fals
     return position;
   };
 
-  const generateSquareWavePath = (xPositions, state = false) => {
-    const pathSegments = [];
-    let currentState = state; // true represents y=100, false represents y=0
+  // const generateSquareWavePath = (xPositions, state = false) => {
+  //   const pathSegments = [];
+  //   let currentState = state; // true represents y=100, false represents y=0
 
-    const x = (i) => (i / 100) * containerDimensions.width;
-    const y = () =>
-      currentState
-        ? containerDimensions.height * 0.25
-        : containerDimensions.height * 0.90;
-    // Start with the initial point (0, height)
-    pathSegments.push(`M0,${y()}`);
+  //   const x = (i) => (i / 100) * containerDimensions.width;
+  //   const y = () =>
+  //     currentState
+  //       ? containerDimensions.height * 0.25
+  //       : containerDimensions.height * 0.90;
+  //   // Start with the initial point (0, height)
+  //   pathSegments.push(`M0,${y()}`);
 
-    for (let i = 0; i < xPositions.length; i++) {
-      // Move to the current x,y
-      pathSegments.push(`L${x(xPositions[i])},${y()}`);
+  //   for (let i = 0; i < xPositions.length; i++) {
+  //     // Move to the current x,y
+  //     pathSegments.push(`L${x(xPositions[i])},${y()}`);
 
-      // Invert the state
-      currentState = !currentState;
+  //     // Invert the state
+  //     currentState = !currentState;
 
-      // Draw a line to the new y with the same x
-      pathSegments.push(`L${x(xPositions[i])},${y()}`);
-    }
+  //     // Draw a line to the new y with the same x
+  //     pathSegments.push(`L${x(xPositions[i])},${y()}`);
+  //   }
 
-    pathSegments.push(`L${x(100)},${y()}`);
-    currentState = false;
-    pathSegments.push(`L${x(100)},${containerDimensions.height * 2}`);
-    pathSegments.push(`L${x(0)},${containerDimensions.height * 2}`);
-    return pathSegments.join(" ");
-  };
+  //   pathSegments.push(`L${x(100)},${y()}`);
+  //   currentState = false;
+  //   pathSegments.push(`L${x(100)},${containerDimensions.height * 2}`);
+  //   pathSegments.push(`L${x(0)},${containerDimensions.height * 2}`);
+  //   return pathSegments.join(" ");
+  // };
 
   const tsXPositions = timestamps
     ? timestamps
         .map((timestamp) => calculateDotPosition(timestamp))
-        .sort((a, b) => a - b)
+        // .sort((a, b) => a - b)
     : [];
 
   const armXPositions = armTimestamps
     ? armTimestamps
         .map((timestamp) => calculateDotPosition(timestamp))
-        .sort((a, b) => a - b)
+        // .sort((a, b) => a - b)
     : [];
 
   return (
@@ -135,9 +135,8 @@ const Timeline = ({ nowTime = 1, timestamps, armTimestamps, initialArmState=fals
       {[...Array(24).keys()].map(
         (hour) =>
           hour % 5 === 0 &&
-          hour >= 3 && (<>
+          hour >= 3 && (<Fragment key={hour+'hr'}>
             <text
-              key={hour+'hr3text'}
               x={`${((0.1 + hour) / 24) * 100}%`}
               y="1.8rem"
               fontSize="2rem"
@@ -148,15 +147,14 @@ const Timeline = ({ nowTime = 1, timestamps, armTimestamps, initialArmState=fals
               {`${hour}:00`}
             </text>
             <line
-            key={hour+'hr3'}
-            x1={`${(hour / 24) * 100}%`}
-            y1="0"
-            x2={`${(hour / 24) * 100}%`}
-            y2="100%"
-            strokeWidth={3}
-            stroke={'darkolivegreen'}
-          />
-          </>)
+              x1={`${(hour / 24) * 100}%`}
+              y1="0"
+              x2={`${(hour / 24) * 100}%`}
+              y2="100%"
+              strokeWidth={3}
+              stroke={'darkolivegreen'}
+            />
+          </Fragment>)
       )}
 
 
