@@ -6,7 +6,7 @@ export function timeStampEvent(ev){
     dateHuman: new Date(ev.time).toLocaleDateString(),
   }
 }
-export function localStorageGetEvents(name,setter){
+export function localStorageGetKeys(name,setter){
   let evs = [...Array(localStorage.length)];
   evs = evs.map((_,i)=>{
     const k = localStorage.key(i)
@@ -19,7 +19,7 @@ export function localStorageGetEvents(name,setter){
   .sort((a,b) => b.time - a.time)
   setter(evs);
 }
-export function localStorageClearEvents(name){
+export function localStorageClearKeys(name){
   let evs = [...Array(localStorage.length)];
   evs = evs.map((e,i)=>{
     return localStorage.key(i)
@@ -28,43 +28,42 @@ export function localStorageClearEvents(name){
     if(k.startsWith(name)) localStorage.removeItem(k);
   })
 }
-export function localStorageSetEvent(name,ev){
+export function localStorageSetKeys(name,ev){
   localStorage.setItem(name+ev.time,JSON.stringify(ev));
 }
-export function localStorageDeleteEvent(name, key, setter){
+export function localStorageDeleteKeys(name, key, setter){
   localStorage.removeItem(key);
-  localStorageGetEvents(name, setter);
+  localStorageGetKeys(name, setter);
+}
+export function localStoragePurgeOldKeys(name, setter){
+  let evs = [...Array(localStorage.length)];
+  evs = evs.map((e,i)=>{
+    return localStorage.key(i)
+  })
+  evs.forEach(k=>{
+    if(k.startsWith(name)) {
+      const ev = JSON.parse(localStorage.getItem(k));
+      if(ev.time < (Date.now() - 172800000)) { //older than 24h
+        localStorage.removeItem(k);
+      }
+    }
+  })
 }
 
 
-export function setEventAuto(name,last,data,setter, atTime = undefined){
+export function localStorageTimestampSet(name,data,setter, atTime = undefined){
   const ee = timeStampEvent({
     time: atTime ? atTime : Date.now(),
     ...data
   })
-
-  const hnow = new Date(atTime);
-  const hlast = new Date(last)
-  const hdelta = hnow.getHours() - hlast.getHours();
-  // console.log(hnow, hlast, hdelta)
-
-  if(hdelta < 0 && !atTime){
-    localStorageClearEvents(name)
-    setter([ee].sort((a,b) => b.time - a.time))
-  }else
-    setter(f => [ee,...f].sort((a,b) => b.time - a.time))
-
-  localStorageSetEvent(name,ee)
+  setter(f => [ee,...f].sort())
+  localStorageSetKeys(name,ee)
 }  
-export function feed(amount, last = undefined, setter, atTime = undefined){
-  setEventAuto('feed',last,{amount},setter, atTime)
-}
+
 export function motion(event, last = undefined, setter, atTime = undefined){
-  setEventAuto('motion',last,{event},setter, atTime)
+  localStorageTimestampSet('motion',{event},setter, atTime)
 }
-export function arm(event, last = undefined, setter, atTime = undefined){
-  setEventAuto('arm',last,{event},setter, atTime)
-}
+
 
 export function isDaytime(timestamp) {
   const date = new Date(timestamp);
@@ -94,6 +93,6 @@ export function isDaytime(timestamp) {
   const minutesSinceMidnight = date.getHours() * 60 + date.getMinutes();
   const isDay = (minutesSinceMidnight >= currentSunrise) && (minutesSinceMidnight <= currentSunset);
   // Check if it's currently within the sunrise and sunset times
-  console.log(timestamp,isDay, minutesSinceMidnight, currentSunrise, currentSunset)
+  // console.log(timestamp,isDay, minutesSinceMidnight, currentSunrise, currentSunset)
   return isDay;
 }

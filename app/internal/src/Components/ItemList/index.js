@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import './index.css'
-import { CSSTransition } from 'react-transition-group';
 
 export default function ItemList({items, Template, onClickShow, ...restProps}){
     // return 
@@ -20,8 +19,7 @@ export default function ItemList({items, Template, onClickShow, ...restProps}){
         onClickShow?.(false)
       }}>Hide Details</button>}
 
-      <CSSTransition unmountOnExit timeout={0} in={show}>
-      <ul className='Items'>
+      {show && <ul className='Items'>
         {items.map((e,i) => {
           if(i === 0) return null
           return Template ? 
@@ -29,7 +27,6 @@ export default function ItemList({items, Template, onClickShow, ...restProps}){
           : 
             <li className={'Item'} key={`item_${i}`} >{JSON.stringify(e)}</li>
         })}
-      </ul>
-      </CSSTransition>
+      </ul>}
     </div> 
 }
