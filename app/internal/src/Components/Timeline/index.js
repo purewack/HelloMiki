@@ -115,7 +115,7 @@ const Timeline = ({ nowTime = 1, timestamps, armTimestamps, initialArmState=fals
         x="0"
         y="0"
         width={`${calculateDotPosition(nowTime)}%`}
-        height='25%'
+        height='100%'
         fill='palegreen'
         opacity={0.5}
       />
@@ -163,7 +163,7 @@ const Timeline = ({ nowTime = 1, timestamps, armTimestamps, initialArmState=fals
         <circle
           key={index+'dot'}
           cx={x + "%"}
-          cy={100 - (20 + (50 * index) / a.length) + "%"}
+          cy={(20 + (80 * index) / a.length) + "%"}
           r="10"
           fill="mediumspringgreen"
           stroke="black"

@@ -8,15 +8,13 @@ import './Theme.css'
 import './Res/svg.css'
 import NetworkPicker from './Components/NetworkPicker';
 import { NavBar, NavOption, NavSet } from './Components/NavBar';
-import ItemList from './Components/ItemList';
 import PopUp from './Components/PopUp';
-import Timeline from './Components/Timeline';
 import FeedingPanel from './PanelFeeding';
-import MotionPanel, { useMotionPanelLogic } from './PanelMotion';
+import MotionPanel from './PanelMotion';
 
 export const inDev = process.env?.NODE_ENV === 'development'
 
-export let address = process.env?.REACT_APP_HW_SERVER_IP || window.location.hostname
+export let address = process.env?.REACT_APP_HW_SERVER_IP || window.location.hostname 
 
 export const TimeContext = createContext();
 
@@ -51,9 +49,9 @@ function App() {
   
 
   const [darkModeTimed, setDarkModeTimed] = useState(false);
-  const [darkModeForced, setDarkModeForced] = useState(JSON.parse(localStorage.getItem('darkMode')));
+  const [darkModeForced, setDarkModeForced] = useState(JSON.parse(localStorage.getItem('darkModeForced')));
   useEffect(()=>{
-    localStorage.setItem('darkMode', darkModeForced ? 'true':'false')
+    localStorage.setItem('darkModeForced', darkModeForced ? 'true':'false')
   },[darkModeForced])
   useEffect(()=>{
     const daytime = isDaytime(currentTime);
@@ -190,10 +188,9 @@ function App() {
       <hr />
       </>}
       
-
       {panels.motion && <MotionPanel onLiveStateChange={(s)=>{setLiveStatus(s)}}/>}
-      {panels.feeding && <FeedingPanel />}
 
+      {panels.feeding && <FeedingPanel />}
         
       <PopUp onExit={()=>{setShowNetwork(false)}} trigger={showNetwork}>
         <NetworkPicker networks={networks} onRefresh={()=>{

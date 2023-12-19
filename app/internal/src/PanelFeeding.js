@@ -1,27 +1,24 @@
 import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import {TimeContext} from './App';
-import { localStorageClearKeys, localStorageDeleteKeys, localStorageGetKeys, localStoragePurgeOldKeys, localStorageTimestampSet } from './Helpers';
+import { localStorageDeleteKeys, localStoragePurgeOldKeys, localStorageTimestampSet } from './Helpers';
 import { NavBar, NavOption, NavSet } from './Components/NavBar';
 import ItemList from './Components/ItemList';
 import Timeline from './Components/Timeline';
 import PopUp from './Components/PopUp';
 
 
-function useFeedingLogic({currentTime}){
+function useFeedingLogic(currentTime){
     const [events, setEvents] = useState([]);
     const [currentState, dispatch] = useReducer((state, action)=>{
         switch(action.type){
             case 'show_late_feed':
                 return {...state, showFeedingLate: true};
-            break;
     
             case 'hide_late_feed':
                 return {...state, showFeedingLate: false};
-            break;
     
             case 'feed_late': 
                 return {...state, amountLate: action.amount};
-            break;
 
             case 'feed_late_submit': 
                 {
@@ -38,24 +35,25 @@ function useFeedingLogic({currentTime}){
                 }
 
                 return {...state, delta:'0h 0min', dt:0, showFeedingLate: false};
-            break;
+            
 
             case 'feed':
                 localStoragePurgeOldKeys('feed',setEvents);
                 localStorageTimestampSet('feed', action.amount, setEvents)
                 return {...state};
-            break;
+           
 
             case 'feed_delete':
                 localStorageDeleteKeys('feed',action.entry,setEvents);
                 return {...state};
-            break;
+            
 
             case 'new_delta':
                 return {...state, delta: action.delta, dt: action.dt};
-            break;
+            
+            default:
+                return {...state};
         }
-        return {...state};
     }, {
         delta: null,
         dt: 0,
@@ -69,7 +67,6 @@ function useFeedingLogic({currentTime}){
             const dt = new Date(now - events[0].time);
             const delta = dt.getHours()-1 + 'h ' + dt.getMinutes() + 'min'
             dispatch({type:'new_delta', delta, dt})
-            // console.log(delta, dt, now)
         }
         else
             dispatch({type:'new_delta', delta: '0h 0min', dt:0})
@@ -78,8 +75,7 @@ function useFeedingLogic({currentTime}){
     
     useEffect(()=>{
         localStoragePurgeOldKeys('feed',setEvents);
-        localStorageGetKeys('feed',setEvents)
-    },[])
+    },[currentTime])
     
     return [currentState, dispatch, events];
 }
