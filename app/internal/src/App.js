@@ -95,6 +95,8 @@ function App() {
   const [liveStatus, setLiveStatus] = useState(true);
   const [panels, setPanels] = useState({feeding:true, motion: true});
 
+  const [feederSlider, setFeederSlider] = useState(true);
+
   if(!appStart){
     return <div className={'App Intro ' + darkClass}>
       <header onClick={()=>{
@@ -151,6 +153,8 @@ function App() {
           <NavOption icon={'CatBlocky'} title='Toggle Motion' action={()=>{setPanels({...panels, motion: !panels.motion})}} />
           <NavOption icon={'Food'} title='Toggle Feeding' action={()=>{setPanels({...panels, feeding: !panels.feeding})}} />
           
+          <NavOption icon={'Food'} title='Toggle Feed Style' action={()=>{setFeederSlider(s=>!s)}} />
+          
           {/* <NavOption icon={'Bin'} title={'Clear Feeding'} action={()=>{
             setFeedingEvents([])
             localStorageClearKeys('feed')
@@ -192,7 +196,7 @@ function App() {
       
       {panels.motion && <MotionPanel onLiveStateChange={(s)=>{setLiveStatus(s)}}/>}
 
-      {panels.feeding && <FeedingPanel />}
+      {panels.feeding && <FeedingPanel feedingBar={feederSlider} />}
         
       <PopUp onExit={()=>{setShowNetwork(false)}} trigger={showNetwork}>
         <NetworkPicker networks={networks} onRefresh={()=>{

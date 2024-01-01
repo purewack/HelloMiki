@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import useDynamicSize from "../../Helpers";
 
-const Slider = ({ className, style, onSlide }) => {
+const Slider = ({ className, style, onSlide, forceSad }) => {
   const [position, setPosition] = useState(0);
   const [ref, width, height] = useDynamicSize();
 
@@ -50,9 +50,13 @@ const Slider = ({ className, style, onSlide }) => {
     document.removeEventListener("pointerup", handlePointerUp);
   };
 
-  const endPointer = () => {
-    onSlide?.(position);
-  };
+  useEffect(() => {
+    if(anim === 'happy') onSlide?.(position);
+  },[position, anim]);
+
+  useEffect(()=>{
+    if(anim === 'happy' && forceSad) setAnim(null);
+  },[forceSad])
 
   const timerRef = useRef();
   useEffect(() => {
@@ -86,8 +90,7 @@ const Slider = ({ className, style, onSlide }) => {
       ref={ref}
       onPointerDown={handlePointerDown}
       onTouchStart={handlePointerDown}
-      onPointerUp={endPointer}
-      onTouchEnd={endPointer}
+      
       style={{
         display: "block",
         position: "relative",

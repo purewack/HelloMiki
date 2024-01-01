@@ -184,13 +184,6 @@ button:hover {
   border: solid lightgray 2px;
 }
 
-.FeedHalf .Icon {
-  mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 20%, rgba(255,255,255,0) 60%, rgba(255,255,255,0) 100%);
-}
-.FeedSnack .Icon {
-  mask-image: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(0,0,0,1) 10%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 100%);
-}
-
 .Disarm {
   opacity: 0.4;
 }
@@ -200,8 +193,10 @@ button:hover {
 .FeedItemContent,
 .EventItemContent {
   display: grid;
-  grid-template-columns: 3fr 1fr;
   align-items: center;
+}
+.EventItemContent {
+  grid-template-columns: 4fr 1fr;
 }
 .FeedItemContent.Preview {
   grid-template-columns: 1fr 3fr 1fr;
@@ -212,7 +207,7 @@ button:hover {
   border-radius: 1rem;
   padding: 0.25rem 1rem;
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
   align-items: center;
 }
 
@@ -256,7 +251,15 @@ button:hover {
   grid-area: dt;
   font-size: 4rem;
 }
-
+.FeedLate form:has(.Feeder){
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background-color: ivory;
+  border-radius: 1rem;
+  padding: 1rem;
+  align-self: stretch;
+}
 
 .List.Monitor {
   padding: 1rem;

@@ -32,15 +32,15 @@ function useFeedingLogic(currentTime){
                         return {...state, showFeedingLate: false}
                     }
                     localStoragePurgeOldKeys('feed',setEvents);
-                    localStorageTimestampSet('feed', action.amount, setEvents, late)
+                    localStorageTimestampSet('feed', {amount:action.amount}, setEvents, late)
                 }
 
-                return {...state, delta:'0h 0min', dt:0, showFeedingLate: false};
+                return {...state, delta:'0h 0min', dt:new Date(), showFeedingLate: false};
             
 
             case 'feed':
                 localStoragePurgeOldKeys('feed',setEvents);
-                localStorageTimestampSet('feed', action.amount, setEvents)
+                localStorageTimestampSet('feed', {amount:action.amount}, setEvents)
                 return {...state};
            
 
@@ -57,7 +57,7 @@ function useFeedingLogic(currentTime){
         }
     }, {
         delta: null,
-        dt: 0,
+        dt: new Date(),
         showFeedingLate: false,
         lateAmount: 0,
     });
@@ -68,9 +68,10 @@ function useFeedingLogic(currentTime){
             const dt = new Date(now - events[0].time);
             const delta = dt.getHours()-1 + 'h ' + dt.getMinutes() + 'min'
             dispatch({type:'new_delta', delta, dt})
+            // console.log('DT',dt);
         }
         else
-            dispatch({type:'new_delta', delta: '0h 0min', dt:0})
+            dispatch({type:'new_delta', delta: '0h 0min', dt:new Date()})
     },[events, currentTime])
 
     
@@ -87,14 +88,15 @@ export default function FeedingPanel({feedingBar = true}){
     const [state, dispatch, events] = useFeedingLogic(currentTime);
     const lateInput = useRef(null);
 
+    const shouldBeHungry = ()=>(state.dt.getHours() >= 3 && state.dt.getMinutes() >= 30)
+
     return <section className='List Food' >
         
-        
-
         <NavBar className='Controls'>
         <NavSet>
             {feedingBar ? <>
                 <Slider className={'Card Feeder'}
+                forceSad={shouldBeHungry()}
                 onSlide={(amount)=>{
                     dispatch({type: 'feed', amount})
                 }}/>
@@ -139,10 +141,12 @@ export default function FeedingPanel({feedingBar = true}){
                 </>}
             </div>
 
-            <div className={'EventBanner Feed ' + (item.amount > 0.5 ? '' : item.amount > 0.1 ? 'FeedHalf' : 'FeedSnack')}>
+            {isPreview && 
+            <div className={'EventBanner Feed '} style={{'--amount':item.amount}}>
             <img alt=""  className={'Icon SVG Food'}/>
-            {isPreview && <p>{item.amount > 0.5 ? 'Whole' : item.amount > 0.1 ? 'Half' : 'Snack'}</p>}
+            <p>{item.amount > 0.6 ? 'Whole' : item.amount > 0.25 ? 'Half' : 'Snack'}</p>
             </div>
+            }
             
         </li>
         }  
@@ -159,20 +163,31 @@ export default function FeedingPanel({feedingBar = true}){
                 e.preventDefault()
                 dispatch({type: 'feed_late_submit', amount: state.lateAmount, time: lateInput.current.value})
             }}>
-            <button type='submit' onClick={()=>{dispatch({type: 'feed_late', amount:1.0}) }}>
-                <img alt='food' className='Icon SVG Food'/>
-                Full
-            </button>
-            <button type='submit' onClick={()=>{dispatch({type: 'feed_late', amount:0.5}) }} className='FeedHalf'>
-                <img alt='food' className='Icon SVG Food'/>
-                Half
-            </button>
-            <button type='submit' onClick={()=>{dispatch({type: 'feed_late', amount:0.1}) }} className='FeedSnack'>
-                <img alt='food' className='Icon SVG Food'/>
-                Snack
-            </button>
+            
             <input ref={lateInput} type="time" id="appt" name="appt" defaultValue="12:00" />
-            </form>
+           
+            {feedingBar ? <>
+                <Slider className={'Card Feeder'} onSlide={(amount)=>{
+                    dispatch({type: 'feed_late', amount})
+                    dispatch({type: 'feed_late_submit', amount: state.lateAmount, time: lateInput.current.value})  
+                }}/>
+            </>
+            :
+            <>
+                <button type='submit' onClick={()=>{dispatch({type: 'feed_late', amount:1.0}) }}>
+                    <img alt='food' className='Icon SVG Food'/>
+                    Full
+                </button>
+                <button type='submit' onClick={()=>{dispatch({type: 'feed_late', amount:0.5}) }} className='FeedHalf'>
+                    <img alt='food' className='Icon SVG Food'/>
+                    Half
+                </button>
+                <button type='submit' onClick={()=>{dispatch({type: 'feed_late', amount:0.1}) }} className='FeedSnack'>
+                    <img alt='food' className='Icon SVG Food'/>
+                    Snack
+                </button>
+            </>}
+             </form>
         </PopUp>
     </section>
 }
