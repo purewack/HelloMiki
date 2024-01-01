@@ -5,6 +5,7 @@ import { NavBar, NavOption, NavSet } from './Components/NavBar';
 import ItemList from './Components/ItemList';
 import Timeline from './Components/Timeline';
 import PopUp from './Components/PopUp';
+import Slider from './Components/Slider';
 
 
 function useFeedingLogic(currentTime){
@@ -80,22 +81,36 @@ function useFeedingLogic(currentTime){
     return [currentState, dispatch, events];
 }
 
-export default function FeedingPanel(){
+export default function FeedingPanel({feedingBar = true}){
 
     const currentTime = useContext(TimeContext);
     const [state, dispatch, events] = useFeedingLogic(currentTime);
     const lateInput = useRef(null);
 
     return <section className='List Food' >
+        
+        
+
         <NavBar className='Controls'>
         <NavSet>
-            <NavOption icon={'Time'} title={'Late'}  action={()=>{  dispatch({type: 'show_late_feed'})    }}/>
-            <NavOption icon={'Food'} title={'Snack'} action={()=>{  dispatch({type: 'feed', amount:0.1})  }} className='FeedSnack' />
-            <NavOption icon={'Food'} title={'1/2'}   action={()=>{  dispatch({type: 'feed', amount:0.5})  }} className='FeedHalf' />
-            <NavOption icon={'Food'} title={'1'}     action={()=>{  dispatch({type: 'feed', amount:1.0})  }}/>
+            {feedingBar ? <>
+                <Slider className={'Card Feeder'}
+                onSlide={(amount)=>{
+                    dispatch({type: 'feed', amount})
+                }}/>
+                <NavOption icon={'Time'} title={'Late'}  action={()=>{  dispatch({type: 'show_late_feed'})    }}/>
+            </>
+            :
+            <>
+                <NavOption icon={'Time'} title={'Late'}  action={()=>{  dispatch({type: 'show_late_feed'})    }}/>
+                <NavOption icon={'Food'} title={'Snack'} action={()=>{  dispatch({type: 'feed', amount:0.1})  }} className='FeedSnack' />
+                <NavOption icon={'Food'} title={'1/2'}   action={()=>{  dispatch({type: 'feed', amount:0.5})  }} className='FeedHalf' />
+                <NavOption icon={'Food'} title={'1'}     action={()=>{  dispatch({type: 'feed', amount:1.0})  }}/>
+            </>}
+            
         </NavSet>
         </NavBar>
-
+        
         <ItemList items={events}
         // onClickShow={(willShow)=>{setShowFeedingList(willShow)}}
         Template={({item, className, isPreview})=>
@@ -104,22 +119,26 @@ export default function FeedingPanel(){
         + (isPreview ? ' Preview ' : '')  
         }>
             {isPreview && <div className='Actions'>
-            <button onClick={(ev)=>{
-                ev.stopPropagation()
-                dispatch({type:'feed_delete', entry: 'feed'+item.time})
-            }}><img alt='bin' className='Icon SVG Bin'/></button>
+                <button onClick={(ev)=>{
+                    ev.stopPropagation()
+                    dispatch({type:'feed_delete', entry: 'feed'+item.time})
+                }}>
+                    <img alt='bin' className='Icon SVG Bin'/>
+                </button>
             </div>}
+
             <div className={'EventTimeBanner'}>
-            {isPreview ? <>
-                <p className='EventTime'>{item.timeHuman}</p>
-                <p className='EventDay'>{item.dateHuman}</p>
-            </>
-            :
-            <>
-                <p className='EventTimeDelta'>{state.delta}</p>
-                <p className='EventTimeSub'>{item.timeHuman}</p>
-            </>}
+                {isPreview ? <>
+                    <p className='EventTime'>{item.timeHuman}</p>
+                    <p className='EventDay'>{item.dateHuman}</p>
+                </>
+                :
+                <>
+                    <p className='EventTimeDelta'>{state.delta}</p>
+                    <p className='EventTimeSub'>{item.timeHuman}</p>
+                </>}
             </div>
+
             <div className={'EventBanner Feed ' + (item.amount > 0.5 ? '' : item.amount > 0.1 ? 'FeedHalf' : 'FeedSnack')}>
             <img alt=""  className={'Icon SVG Food'}/>
             {isPreview && <p>{item.amount > 0.5 ? 'Whole' : item.amount > 0.1 ? 'Half' : 'Snack'}</p>}
@@ -128,7 +147,7 @@ export default function FeedingPanel(){
         </li>
         }  
         />
-
+        
         <Timeline className={'Card FeedingTimeline'} 
             nowTime={currentTime}
             timestamps={events.map(e => e.time)} 

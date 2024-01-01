@@ -52,3 +52,10 @@
 .App.Dark .FeedingTimeline {
   filter: hue-rotate(-120deg) invert(1);
 }
+
+.App.Dark .Feeder line{
+  stroke: white;
+}
+.App.Dark .Feeder text{
+  fill: white;
+}

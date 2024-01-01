@@ -101,7 +101,7 @@ function App() {
         if(!inDev) catVoiceAlert('meow, Hello Meekee!');
         setAppStart(true);
       }}>
-        <p className='Logo'>😻</p>
+        <p className='Logo'><img className='Icon SVG Logo'/></p>
         <div>
         <h1>Hello Miki!</h1>
         <i>Click to open monitor</i>
@@ -133,7 +133,9 @@ function App() {
         <h1>Hello Miki</h1>
         <h3><i>{currentNetwork}</i></h3>
         </div>
-        <span className={'Logo Main ' + (liveStatus && 'Live')}>😻</span>
+        <span className={'Logo Main ' + (liveStatus && 'Live')}>
+          <img className='Icon SVG Logo'/>
+        </span>
       </header> 
 
       

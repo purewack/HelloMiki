@@ -31,8 +31,10 @@
   border: solid lightgray 2px;
   padding: 3rem;
 }
-.App.Intro .Logo{
-  font-size: 12rem;
+.App .Logo{
+  /* font-size: 12rem; */
+  height: 20vmin;
+  object-fit: contain;
   padding: 0;
   margin: 0;
 }
@@ -294,4 +296,9 @@ button:hover {
   background-color: white;
   padding: 0;
   filter: hue-rotate(120deg);
+}
+
+.Feeder {
+  flex-grow:  1;
+  align-self: stretch;
 }
