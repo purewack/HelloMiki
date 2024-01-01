@@ -1,7 +1,12 @@
 import { useCallback, useContext, useEffect, useReducer, useRef, useState } from "react";
 import { TimeContext, address, catVoiceAlert, inDev } from "./App";
 import { isApiEmulate, requestMockEvent, setServerTime } from "./REST";
-import { localStoragePurgeOldKeys, localStorageTimestampSet } from "./Helpers";
+import { 
+    syncFromLocalStorage, syncToLocalStorage, 
+    arrayPurgeOld, arrayMergeClose, 
+    arrayAddSort, arrayRemoveTimestamped,  
+    timestampEvent,
+} from "./Helpers";
 import Timeline from "./Components/Timeline";
 import ItemList from "./Components/ItemList";
 
@@ -53,11 +58,11 @@ function useMotionWebSocket(onStateChange, onMessage){
 
     const onWSMessage = useCallback((ev)=>{
         if(!ev) return
-        console.log(ev.data)
+        // console.log(ev.data)
         const event = JSON.parse(ev.data)
 
         if(event.type === 'sensor'){
-            onMessage('motion',{now:event.now})
+            onMessage('motion',{...event})
         }
 
         //UPDATE FUNCTION Removed for now
@@ -89,12 +94,35 @@ export function useMotionPanelLogic(currentTime){
     
     const [events, setEvents] = useState([]);
     const [armed, setArmed] = useState(true);
+
+    const sense = (data)=>{
+        setEvents(evs => {  
+            const ev = timestampEvent(data)      
+            const finalEvents = arrayMergeClose(
+                arrayAddSort(
+                    arrayPurgeOld(evs), 
+                    ev
+                )
+            ,3);
+            syncToLocalStorage('motion',finalEvents);
+            return [...finalEvents]
+        });
+    }
+
+    // const removeSense = (entry) => {
+    //     const finalEvents = arrayRemoveTimestamped(
+    //         arrayPurgeOld(events), 
+    //         entry.time
+    //     );
+    //     setEvents(finalEvents);
+    //     syncToLocalStorage('motion',finalEvents);
+    // }
+
     
     const onWSEvent = useCallback((type,data)=>{
         if(type === 'motion' &&  data.now === 1){
             if(armed) catVoiceAlert('meow meow')
-            localStoragePurgeOldKeys('motion',setEvents);
-            localStorageTimestampSet('motion',data,setEvents);
+            sense(data);
         }
     },[armed])
     const onWSChange = useCallback((type,data)=>{
@@ -134,9 +162,9 @@ export function useMotionPanelLogic(currentTime){
     })
 
     useEffect(()=>{
-        // localStorageGetEvents('arm',setSensorsArmedEvents);
-        localStoragePurgeOldKeys('motion',setEvents);
-        // localStorageGetKeys('motion',setEvents);
+        const motions = arrayPurgeOld(syncFromLocalStorage('motion'));
+        if(motions?.length)
+        setEvents(motions);
     },[currentTime])
 
     return [currentState, dispatch, events]
@@ -162,7 +190,7 @@ export default function MotionPanel({onLiveStateChange}){
             
             <Timeline className={'Card MotionTimeline'} 
                 nowTime={currentTime}
-                timestamps={events.map(e => e.time)} 
+                timestamps={events?.map(e => e.time)} 
                 // timestamps={[1702531585000, 1702538785000, 1702556785000, 1702558705000, 1702559425000, 1702584625000, 1702591225000, 1702593924336]}
             />
             

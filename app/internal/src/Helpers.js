@@ -1,99 +1,70 @@
-import { useRef, useState, useLayoutEffect } from "react";
+//events storage and manipulation
 
-export default function useDynamicSize() {
-  const ref = useRef(null);
-  const [containerDimensions, setContainerDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-
-  useLayoutEffect(() => {
-    const handleResize = () => {
-      if (ref.current) {
-        setContainerDimensions({
-          width: ref.current.clientWidth,
-          height: ref.current.clientHeight,
-        });
-      }
-    };
-
-    handleResize(); // Initial calculation
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  return [ref, containerDimensions.width, containerDimensions.height];
+export function syncFromLocalStorage(name){
+  return JSON.parse(localStorage.getItem(name)) || []
 }
 
-//helper functions
-export function timeStampEvent(ev){
-  return {
-    ...ev,
-    timeHuman: new Date(ev.time).toLocaleTimeString(),
-    dateHuman: new Date(ev.time).toLocaleDateString(),
-  }
+export function syncToLocalStorage(name, items){
+  localStorage.setItem(name,JSON.stringify(!items ? [] : items));
 }
 
-export function localStorageGetKeys(name,setter){
-  let evs = [...Array(localStorage.length)];
-  evs = evs.map((_,i)=>{
-    const k = localStorage.key(i)
-    if(k.startsWith(name)){
-      return JSON.parse(localStorage.getItem(k))
-    }
-    return null
-  })
-  .filter((v,i) => v !== null)
-  .sort((a,b) => b.time - a.time)
-  setter(evs);
+
+export function arrayAddSort(items, newItem){
+  if(!items || !items?.length) return [newItem]
+  items.push(newItem)
+  return items.sort((a,b) => b.time - a.time);
 }
 
-export function localStorageClearKeys(name){
-  let evs = [...Array(localStorage.length)];
-  evs = evs.map((e,i)=>{
-    return localStorage.key(i)
-  })
-  evs.forEach(k=>{
-    if(k.startsWith(name)) localStorage.removeItem(k);
-  })
+export function arrayRemoveTimestamped(items, time){
+  if(!items || !items?.length) return []
+  const indexToRemove = items.findIndex(item => item.time === time);
+  if (indexToRemove !== -1) items.splice(indexToRemove, 1);
+  return [...items];
 }
 
-export function localStorageSetKeys(name,ev){
-  localStorage.setItem(name+ev.time,JSON.stringify(ev));
-}
-
-export function localStorageDeleteKeys(name, key, setter){
-  localStorage.removeItem(key);
-  localStorageGetKeys(name, setter);
-}
-
-export function localStoragePurgeOldKeys(name, setter, hours = 22){
-  let evs = [...Array(localStorage.length)];
-  evs = evs.map((e,i)=>{
-    return localStorage.key(i)
-  })
-  evs.forEach(k=>{
-    if(k.startsWith(name)) {
-      const ev = JSON.parse(localStorage.getItem(k));
-      if(ev.time < (Date.now() - (hours * 3600000))) { //older than 24h
-        localStorage.removeItem(k);
-      }
-    }
-  })
-  localStorageGetKeys(name,setter);
-}
-
-export function localStorageTimestampSet(name,data,setter, atTime = undefined){
-  const ee = timeStampEvent({
-    time: atTime ? atTime : Date.now(),
+export function timestampEvent(data, atTime = undefined){
+  const time = atTime ? atTime : Date.now();
+  return { 
+    time,
+    timeHuman: new Date(time).toLocaleTimeString(),
+    dateHuman: new Date(time).toLocaleDateString(),
     ...data
-  })
-  setter(f => [ee,...f].sort())
-  localStorageSetKeys(name,ee)
+  }
 }  
+
+export function arrayPurgeOld(items, hours = 22){
+  if(!items || !items?.length) return []
+  return items.filter(ev => {
+    if(ev.time < (Date.now() - (hours * 3600000)))//older than x hours
+      return false;
+    
+    return true;
+  })
+}
+
+export function arrayMergeClose(items, thresholdMins) {
+  if(!items || !items?.length) return []
+
+  items.sort((a, b) => a.time - b.time);
+
+  const filteredArray = [items[0]]; // Initialize with the first element
+
+  for (let i = 1; i < items.length; i++) {
+    const currentObject = items[i];
+    const lastObject = filteredArray[filteredArray.length - 1];
+
+    const timeDifference = (currentObject.time - lastObject.time) / (60 * 1000);
+
+    if (timeDifference < thresholdMins) {
+      // If the time difference is less than the threshold, discard the older object
+      filteredArray.pop();
+    }
+
+    // Add the current object to the filtered array
+    filteredArray.push(currentObject);
+  }
+  return filteredArray.sort((a,b)=> b.time - a.time);
+}
 
 
 

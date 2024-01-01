@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import useDynamicSize from "../../Helpers";
+import useDynamicSize from "../../Hooks";
 
 const Slider = ({ className, style, onSlide, forceSad }) => {
   const [position, setPosition] = useState(0);

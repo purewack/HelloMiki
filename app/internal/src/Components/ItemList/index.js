@@ -18,10 +18,10 @@ export default function ItemList({items, Template, onClickShow, ...restProps}){
         onClickShow?.(false)
       }}>Hide Details</button>}
 
-      {items.length >= 1 ? (!show && Template ? <Template className='Item High' isPreview={false} item={items[0]} index={0}/> : null) : <NoItem/>}
+      {items?.length >= 1 ? (!show && Template ? <Template className='Item High' isPreview={false} item={items[0]} index={0}/> : null) : <NoItem/>}
 
-      {show && items.length >= 1 && <ul className='Items'>
-        {items.map((e,i) => {
+      {show && items?.length >= 1 && <ul className='Items'>
+        {items?.map((e,i) => {
           return Template ? 
             <Template  key={`item_${i}`} className='Item' item={e} index={i} isPreview={true}/> 
           : 

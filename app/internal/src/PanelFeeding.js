@@ -1,6 +1,11 @@
 import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import {TimeContext} from './App';
-import { localStorageDeleteKeys, localStoragePurgeOldKeys, localStorageTimestampSet } from './Helpers';
+import { 
+    syncFromLocalStorage, syncToLocalStorage, 
+    arrayPurgeOld, arrayMergeClose, 
+    arrayAddSort, arrayRemoveTimestamped,  
+    timestampEvent,
+} from './Helpers';
 import { NavBar, NavOption, NavSet } from './Components/NavBar';
 import ItemList from './Components/ItemList';
 import Timeline from './Components/Timeline';
@@ -9,7 +14,37 @@ import Slider from './Components/Slider';
 
 
 function useFeedingLogic(currentTime){
+
     const [events, setEvents] = useState([]);
+
+    const feed = (amount, time = undefined)=>{
+        setEvents(evs => {  
+            const ev = timestampEvent({amount},time)      
+            const finalEvents = arrayMergeClose(
+                arrayAddSort(
+                    arrayPurgeOld(evs), 
+                    ev
+                )
+            ,5);
+            syncToLocalStorage('feed',finalEvents);
+            return [...finalEvents]
+        });
+    }
+
+    const removeFeed = (entry) => {
+        console.log('remove',entry)
+        setEvents(evs => {    
+            const finalEvents = 
+                arrayRemoveTimestamped(
+                    arrayPurgeOld(evs), 
+                    entry.time
+                )
+            syncToLocalStorage('feed',finalEvents);
+            return [...finalEvents]
+        });
+    }
+
+
     const [currentState, dispatch] = useReducer((state, action)=>{
         switch(action.type){
             case 'show_late_feed':
@@ -31,21 +66,19 @@ function useFeedingLogic(currentTime){
                     if(late > Date.now()) {
                         return {...state, showFeedingLate: false}
                     }
-                    localStoragePurgeOldKeys('feed',setEvents);
-                    localStorageTimestampSet('feed', {amount:action.amount}, setEvents, late)
+                    feed(action.amount, late);
                 }
 
                 return {...state, delta:'0h 0min', dt:new Date(), showFeedingLate: false};
             
 
-            case 'feed':
-                localStoragePurgeOldKeys('feed',setEvents);
-                localStorageTimestampSet('feed', {amount:action.amount}, setEvents)
+            case 'feed':{
+                feed(action.amount);
                 return {...state};
-           
+            }
 
             case 'feed_delete':
-                localStorageDeleteKeys('feed',action.entry,setEvents);
+                removeFeed(action.entry)
                 return {...state};
             
 
@@ -63,7 +96,7 @@ function useFeedingLogic(currentTime){
     });
 
     useEffect(()=>{
-        if(events[0]?.time){
+        if(events?.[0]?.time){
             const now = new Date();
             const dt = new Date(now - events[0].time);
             const delta = dt.getHours()-1 + 'h ' + dt.getMinutes() + 'min'
@@ -76,7 +109,9 @@ function useFeedingLogic(currentTime){
 
     
     useEffect(()=>{
-        localStoragePurgeOldKeys('feed',setEvents);
+        const feeds = arrayPurgeOld(syncFromLocalStorage('feed'));
+        if(feeds?.length)
+        setEvents(feeds);
     },[currentTime])
     
     return [currentState, dispatch, events];
@@ -105,8 +140,8 @@ export default function FeedingPanel({feedingBar = true}){
             :
             <>
                 <NavOption icon={'Time'} title={'Late'}  action={()=>{  dispatch({type: 'show_late_feed'})    }}/>
-                <NavOption icon={'Food'} title={'Snack'} action={()=>{  dispatch({type: 'feed', amount:0.1})  }} className='FeedSnack' />
-                <NavOption icon={'Food'} title={'1/2'}   action={()=>{  dispatch({type: 'feed', amount:0.5})  }} className='FeedHalf' />
+                <NavOption icon={'Food'} title={'Snack'} action={()=>{  dispatch({type: 'feed', amount:0.1})  }} />
+                <NavOption icon={'Food'} title={'1/2'}   action={()=>{  dispatch({type: 'feed', amount:0.5})  }} />
                 <NavOption icon={'Food'} title={'1'}     action={()=>{  dispatch({type: 'feed', amount:1.0})  }}/>
             </>}
             
@@ -123,7 +158,7 @@ export default function FeedingPanel({feedingBar = true}){
             {isPreview && <div className='Actions'>
                 <button onClick={(ev)=>{
                     ev.stopPropagation()
-                    dispatch({type:'feed_delete', entry: 'feed'+item.time})
+                    dispatch({type:'feed_delete', entry: item})
                 }}>
                     <img alt='bin' className='Icon SVG Bin'/>
                 </button>
@@ -154,7 +189,7 @@ export default function FeedingPanel({feedingBar = true}){
         
         <Timeline className={'Card FeedingTimeline'} 
             nowTime={currentTime}
-            timestamps={events.map(e => e.time)} 
+            timestamps={events?.map(e => e.time)} 
         />
         
         <PopUp className="FeedLate" trigger={state.showFeedingLate} onExit={()=>{dispatch({type:'hide_late_feed'})}}>
