@@ -32,7 +32,7 @@ const Timeline = ({ nowTime = 1, timestamps, armTimestamps, initialArmState=fals
     const totalMinutes = hour + date.getMinutes();
     const truncatedMinutes = Math.floor(totalMinutes / 15) * 15; // Truncate to 15-minute intervals
     const totalMinutesInDay = 24 * 60;
-    const position = (truncatedMinutes / totalMinutesInDay) * 100;
+    const position = (totalMinutes / totalMinutesInDay) * 100;
     return position;
   };
 
