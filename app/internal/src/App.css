@@ -241,17 +241,18 @@ button:hover {
 }
 
 
-.FeedLate form {
+/* .FeedLate form {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   grid-template-areas:  "dt dt dt"  "F H S";
-}
+} */
 .FeedLate input[type='time']{
   grid-area: dt;
   font-size: 4rem;
+  text-align: center;
 }
-.FeedLate form:has(.Feeder){
+.FeedLate form{
   display: flex;
   flex-direction: column;
   align-items: stretch;

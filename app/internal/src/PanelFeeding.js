@@ -132,6 +132,7 @@ export default function FeedingPanel({feedingBar = true}){
             {feedingBar ? <>
                 <Slider className={'Card Feeder'}
                 forceSad={shouldBeHungry()}
+                lastAmount={events?.[0]?.amount}
                 onSlide={(amount)=>{
                     dispatch({type: 'feed', amount})
                 }}/>

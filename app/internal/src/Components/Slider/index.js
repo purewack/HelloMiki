@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import useDynamicSize from "../../Hooks";
 
-const Slider = ({ className, style, onSlide, forceSad }) => {
+const Slider = ({ className, style, onSlide, lastAmount, forceSad }) => {
   const [position, setPosition] = useState(0);
   const [ref, width, height] = useDynamicSize();
 
@@ -50,10 +50,6 @@ const Slider = ({ className, style, onSlide, forceSad }) => {
     document.removeEventListener("pointerup", handlePointerUp);
   };
 
-  useEffect(() => {
-    if(anim === 'happy') onSlide?.(position);
-  },[position, anim]);
-
   useEffect(()=>{
     if(anim === 'happy' && forceSad) setAnim(null);
   },[forceSad])
@@ -67,6 +63,8 @@ const Slider = ({ className, style, onSlide, forceSad }) => {
     if (anim === "feed") {
       timerRef.current = setTimeout(() => {
         setAnim("happy");
+        onSlide?.(position)
+        setPosition(0);
       }, 2000);
     }
 
@@ -116,6 +114,18 @@ const Slider = ({ className, style, onSlide, forceSad }) => {
       <text x="76%" y="90%">
         75%
       </text>
+
+      {/* last feeding handle */}
+      <rect
+        style={{
+          pointerEvents: "none",
+          transition: "width 500ms",
+        }}
+        width={`${lastAmount * 100}%`}
+        height="100%"
+        fill="lightpink"
+        opacity={0.5}
+      />
 
       {/* Slider handle */}
       <rect
